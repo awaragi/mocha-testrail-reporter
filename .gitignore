@@ -1,0 +1,7 @@
+node_modules
+node-debug*
+.c9/
+*.iml
+.idea/
+npm-debug.log
+dist

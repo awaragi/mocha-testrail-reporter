@@ -1,0 +1,46 @@
+{
+  "name": "mocha-testrail-reporter",
+  "version": "1.0.6",
+  "description": "A Testrails reporter for mocha.",
+  "main": "index.js",
+  "private": false,
+  "keywords": [
+    "mocha",
+    "testrail",
+    "reporter"
+  ],
+  "author": {
+    "name": "Pierre Awaragi",
+    "email": "pierre@awaragi.com"
+  },
+  "license": "MIT",
+  "readmeFilename": "README.md",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/awaragi/mocha-testrail-reporter.git"
+  },
+  "bugs": {
+    "url": "https://github.com/awaragi/mocha-testrail-reporter/issues"
+  },
+  "scripts": {
+    "tsc": "tsc",
+    "clean": "rimraf dist",
+    "test": "mocha dist/test",
+    "build": "npm run clean && npm run tsc"
+  },
+  "dependencies": {
+    "btoa": "^1.1.2",
+    "unirest": "^0.5.1"
+  },
+  "peerDependencies": {
+    "mocha": "^3 || ^2.2.5"
+  },
+  "devDependencies": {
+    "@types/chai": "^3.4.34",
+    "@types/mocha": "^2.2.36",
+    "@types/node": "^6.0.58",
+    "chai": "^3.5.0",
+    "rimraf": "^2.5.4",
+    "typescript": "^2.1.4"
+  }
+}
