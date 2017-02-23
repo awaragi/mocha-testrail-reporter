@@ -1,6 +1,6 @@
-#Testrails Reporter for Mocha
+#Testrail Reporter for Mocha
 
-Pushes test results into TestRail system.
+Pushes test results into Testrail system.
 
 ## Installation
 
@@ -25,7 +25,7 @@ mocha --opts mocha-testrail.opts build/test
 ```
 
 
-Mark your mocha test names with ID of testrail test cases. Ensure that your case ids are well distinct from test descriptions.
+Mark your mocha test names with ID of Testrail test cases. Ensure that your case ids are well distinct from test descriptions.
  
 ```Javascript
 it("C123 C124 Authenticate with invalid user", . . .
@@ -36,7 +36,7 @@ Only passed or failed tests will be published. Skipped or pending tests will not
 
 ## Options
 
-**domain**: *string* domain name of your testrail instance (e.g. for a hosted instance instance.testrail.net)
+**domain**: *string* domain name of your Testrail instance (e.g. for a hosted instance instance.testrail.net)
 
 **username**: *string* user under which the test run will be created (e.g. jenkins or ci)
 
