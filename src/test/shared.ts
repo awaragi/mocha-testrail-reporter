@@ -6,16 +6,16 @@ import {titleToCaseIds} from "../lib/shared";
 describe("Shared functions", () => {
     describe("titleToCaseIds", () => {
         it("Single test case id present", () => {
-            let caseIds = titleToCaseIds("TC123 Test title");
+            let caseIds = titleToCaseIds("C123 Test title");
             caseIds.length.should.be.equals(1);
             caseIds[0].should.be.equals(123);
 
-            caseIds = titleToCaseIds("Execution of TC123 Test title");
+            caseIds = titleToCaseIds("Execution of C123 Test title");
             caseIds.length.should.be.equals(1);
             caseIds[0].should.be.equals(123);
         });
         it("Multiple test case ids present", () => {
-            let caseIds = titleToCaseIds("Execution TC321 TC123 Test title");
+            let caseIds = titleToCaseIds("Execution C321 C123 Test title");
             caseIds.length.should.be.equals(2);
             caseIds[0].should.be.equals(321);
             caseIds[1].should.be.equals(123);
