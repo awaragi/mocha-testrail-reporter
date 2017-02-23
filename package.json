@@ -1,7 +1,7 @@
 {
   "name": "mocha-testrail-reporter",
   "version": "1.0.9",
-  "description": "A Testrails reporter for mocha.",
+  "description": "A Testrail reporter for mocha.",
   "main": "index.js",
   "private": false,
   "keywords": [
