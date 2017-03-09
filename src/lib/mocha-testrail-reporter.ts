@@ -91,7 +91,7 @@ ${test.err}`
             throw new Error("Missing --reporter-options in mocha.opts");
         }
         if (options[name] == null) {
-            throw new Error("Missing ${name} value. Please update --reporter-options in mocha.opts");
+            throw new Error(`Missing ${name} value. Please update --reporter-options in mocha.opts`);
         }
     }
 }
