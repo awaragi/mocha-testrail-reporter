@@ -1,5 +1,7 @@
 #Testrail Reporter for Mocha
 
+[![npm version](https://badge.fury.io/js/mocha-testrail-reporter.svg)](https://badge.fury.io/js/mocha-testrail-reporter)
+
 Pushes test results into Testrail system.
 
 ## Installation
@@ -9,6 +11,8 @@ $ npm install mocha-testrail-reporter --save-dev
 ```
 
 ## Usage
+Ensure that your testrail installation API is enabled and generate your API keys. See http://docs.gurock.com/
+
 Run mocha with `mocha-testrail-reporter`:
 
 ```shell
