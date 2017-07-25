@@ -1,23 +1,39 @@
 import {TestRail} from "../lib/testrail";
+import {TestRailResult, TestRailCase, Status} from "../lib/testrail.interface";
 
-describe.skip("TestRail API", () => {
+describe("TestRail API", () => {
     it("Publish test run", (done) => {
-        new TestRail({
-            domain: "testingoutone",
-            username: "testingout.one@mailinator.com",
-            password: "XyMp8uojG3wkzNNNXiTk-dP4MnBmOiQhVC2xGvmyY",
-            projectId: 1,
-            suiteId: 2,
-            assignedToId: 1,
-        }).publish(0, 0, 0, ["test 1: pass", "test 2: fail"], [
-            {
-                caseId: 74,
-                pass: true
-            }, {
-                caseId: 75,
-                pass: false,
-                comment: "Failure...."
-            }
-        ], done);
-    })
+        let testRail = new TestRail({
+            domain: process.env.DOMAIN,
+            username: process.env.USERNAME,
+            password: process.env.PASSWORD,
+            projectId: 10,
+            suiteId: 104,
+            // assignedToId: 2,
+        });
+
+        testRail.fetchCases({type_id: [3], priority_id: [4]}, (cases: TestRailCase[]) => {
+            console.log(cases);
+            let results: TestRailResult
+            cases.forEach((value => {
+                console.log(value.id, value.title);
+            }));
+        });
+
+        testRail.publish("Unit Test of mocha-testrail-reporter", "Unit Test of mocha-testrail-reporter", [{
+            case_id: 3033,
+            status_id: Status.Passed,
+            comment: "Passing...."
+        }, {
+            case_id: 3034,
+            status_id: Status.Passed
+        }, {
+            case_id: 3035,
+            status_id: Status.Passed
+        }, {
+            case_id: 3036,
+            status_id: Status.Failed,
+            comment: "Failure...."
+        }], done);
+    });
 });
