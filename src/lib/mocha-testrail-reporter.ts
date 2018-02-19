@@ -1,7 +1,7 @@
 import {reporters} from 'mocha';
 import {TestRail} from "./testrail";
 import {titleToCaseIds} from "./shared";
-import {Status, TestRailResult} from "./testrail.interface";
+import {Status, TestRailResult, TestRailOptions} from "./testrail.interface";
 
 
 export class MochaTestRailReporter extends reporters.Spec {
@@ -19,7 +19,7 @@ export class MochaTestRailReporter extends reporters.Spec {
         this.validate(reporterOptions, 'username');
         this.validate(reporterOptions, 'password');
         this.validate(reporterOptions, 'projectId');
-        this.validate(reporterOptions, 'suiteId');
+        this.validateEither(reporterOptions, ['suiteId', 'runId']);
 
         runner.on('start', () => {
         });
@@ -106,6 +106,18 @@ ${this.out.join('\n')}
         }
         if (options[name] == null) {
             throw new Error(`Missing ${name} value. Please update --reporter-options in mocha.opts`);
+        }
+    }
+
+    private validateEither(options: TestRailOptions, names: string[]) {
+        if (options == null) {
+            throw new Error("Missing --reporter-options in mocha.opts");
+        }
+
+        if (!names.reduce((previousValue, currentValue) => {
+            return previousValue || options[currentValue] != null
+        }, false)) {
+            throw new Error(`Missing either options of: ${names.join(", ")}. Please update --reporter-options in mocha.opts`);
         }
     }
 }

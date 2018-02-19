@@ -79,24 +79,32 @@ export class TestRail {
 
     /**
      * Publishes results of execution of an automated test run
-     * @param {string} name
-     * @param {string} description
+     * @param {string} name New test run name. Only applicable when runID is not specified
+     * @param {string} description New test run description. Only applicable when runID is not specified
      * @param {TestRailResult[]} results
      * @param {Function} callback
      */
     public publish(name: string, description: string, results: TestRailResult[], callback?: Function): void {
         console.log(`Publishing ${results.length} test result(s) to ${this.base}`);
 
-        this._post(`add_run/${this.options.projectId}`, {
-            "suite_id": this.options.suiteId,
-            "name": name,
-            "description": description,
-            "assignedto_id": this.options.assignedToId,
-            "include_all": true
-        }, (body) => {
-            const runId = body.id
-            console.log(`Results published to ${this.base}?/runs/view/${runId}`)
-            this._post(`add_results_for_cases/${runId}`, {
+        let self = this;
+        let  p = this.options.runId? Promise.resolve(this.options.runId): new Promise((resolve, reject) => {
+            self._post(`add_run/${self.options.projectId}`, {
+                "suite_id": self.options.suiteId,
+                "name": name,
+                "description": description,
+                "assignedto_id": self.options.assignedToId,
+                "include_all": true
+            }, (body) => {
+                resolve(body.id);
+            }, (err) => {
+                reject(err);
+            })
+        })
+
+        p.then((runId) => {
+            console.log(`Results published to ${self.base}?/runs/view/${runId}`)
+            self._post(`add_results_for_cases/${runId}`, {
                 results: results
             }, (body) => {
                 // execute callback if specified
@@ -104,6 +112,6 @@ export class TestRail {
                     callback();
                 }
             })
-        });
+        })
     }
 }
