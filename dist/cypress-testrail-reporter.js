@@ -75,7 +75,8 @@ var CypressTestRailReporter = /** @class */ (function (_super) {
             }
             var executionDateTime = moment().format('MMM Do YYYY, HH:mm');
             var totalCases = _this.passes + _this.fails + _this.pending;
-            var totalDuration = moment().set('millisecond', _this.durationInMs).format('mm min ss sec');
+            var momentDuration = moment.duration(_this.durationInMs);
+            var totalDuration = "" + (momentDuration.hours() ? momentDuration.hours() + ' hours ' : '') + momentDuration.minutes() + " min " + momentDuration.seconds() + " sec";
             var name = (reporterOptions.runName || 'Automated test run') + " " + executionDateTime;
             var description = "Automated test run executed on " + executionDateTime + "\nExecution summary:\nDuration: " + totalDuration + "\nPasses: " + _this.passes + "\nFails: " + _this.fails + "\nPending: " + _this.pending + "\nTotal: " + totalCases;
             new testrail_1.TestRail(reporterOptions).publish(name, description, _this.results);
