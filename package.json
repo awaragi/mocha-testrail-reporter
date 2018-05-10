@@ -1,11 +1,11 @@
 {
   "name": "cypress-testrail-reporter",
-  "version": "1.0.12",
-  "description": "A Testrail reporter for mocha including TestRail API basic library",
+  "version": "1.0.0",
+  "description": "A Testrail reporter for cypress including TestRail API basic library",
   "main": "index.js",
   "private": false,
   "keywords": [
-    "mocha",
+    "cypress",
     "testrail",
     "reporter"
   ],
@@ -39,6 +39,7 @@
     "@types/mocha": "^2.2.36",
     "@types/node": "^6.0.58",
     "chai": "^3.5.0",
+    "moment": "^2.22.1",
     "rimraf": "^2.5.4",
     "typescript": "^2.1.4"
   }
