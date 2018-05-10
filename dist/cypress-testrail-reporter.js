@@ -90,8 +90,7 @@ var CypressTestRailReporter = /** @class */ (function (_super) {
             }
             var executionDateTime = moment().format('MMM Do YYYY, HH:mm');
             var total = _this.passes + _this.fails + _this.pending;
-            var name = 'asd fasdf laksjdf lajsdl fjasdjf lakjsbdlgjha;hjnbpsudnf; h';
-            //   let name = `${reporterOptions.runName || 'Automated test run'} ${executionDateTime}`;
+            var name = (reporterOptions.runName || 'Automated test run') + " " + executionDateTime;
             var description = "Automated test run executed on " + executionDateTime + "\nExecution summary:\nPasses: " + _this.passes + "\nFails: " + _this.fails + "\nPending: " + _this.pending + "\nTotal: " + total + "\n\nExecution details:\n" + _this.out.join('\n') + "                     \n";
             new testrail_1.TestRail(reporterOptions).publish(name, description, _this.results);
         });
