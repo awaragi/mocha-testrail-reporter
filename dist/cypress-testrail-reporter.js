@@ -22,7 +22,6 @@ var CypressTestRailReporter = /** @class */ (function (_super) {
         _this.results = [];
         _this.passes = 0;
         _this.fails = 0;
-        _this.pending = 0;
         _this.durationInMs = 0;
         var reporterOptions = options.reporterOptions;
         _this.validate(reporterOptions, 'domain');
@@ -30,11 +29,13 @@ var CypressTestRailReporter = /** @class */ (function (_super) {
         _this.validate(reporterOptions, 'password');
         _this.validate(reporterOptions, 'projectId');
         _this.validate(reporterOptions, 'suiteId');
-        runner.on('start', function () { });
-        runner.on('suite', function (suite) { });
-        runner.on('suite end', function () { });
-        runner.on('pending', function (test) {
-            _this.pending++;
+        runner.on('suite', function (suite) {
+            console.log('A A A A A A A A A A A SUITE:');
+            console.dir(suite);
+        });
+        runner.on('hook end', function (hook) {
+            console.log('HOOK:');
+            console.dir(hook);
         });
         runner.on('pass', function (test) {
             _this.passes++;
@@ -74,11 +75,11 @@ var CypressTestRailReporter = /** @class */ (function (_super) {
                 return;
             }
             var executionDateTime = moment().format('MMM Do YYYY, HH:mm');
-            var totalCases = _this.passes + _this.fails + _this.pending;
+            var totalCases = _this.passes + _this.fails;
             var momentDuration = moment.duration(_this.durationInMs);
             var totalDuration = "" + (momentDuration.hours() ? momentDuration.hours() + ' hours ' : '') + momentDuration.minutes() + " min " + momentDuration.seconds() + " sec";
             var name = (reporterOptions.runName || 'Automated test run') + " " + executionDateTime;
-            var description = "Automated test run executed on " + executionDateTime + "\nExecution summary:\nDuration: " + totalDuration + "\nPasses: " + _this.passes + "\nFails: " + _this.fails + "\nPending: " + _this.pending + "\nTotal: " + totalCases;
+            var description = "Automated test run executed on " + executionDateTime + "\nExecution summary:\nDuration: " + totalDuration + "\nPasses: " + _this.passes + "\nFails: " + _this.fails + "\nTotal: " + totalCases;
             new testrail_1.TestRail(reporterOptions).publish(name, description, _this.results);
         });
         return _this;

@@ -8,7 +8,6 @@ export class CypressTestRailReporter extends reporters.Spec {
   private results: TestRailResult[] = [];
   private passes: number = 0;
   private fails: number = 0;
-  private pending: number = 0;
   private durationInMs: number = 0;
 
   constructor(runner: any, options: any) {
@@ -21,15 +20,15 @@ export class CypressTestRailReporter extends reporters.Spec {
     this.validate(reporterOptions, 'projectId');
     this.validate(reporterOptions, 'suiteId');
 
-    runner.on('start', () => {});
-
-    runner.on('suite', suite => {});
-
-    runner.on('suite end', () => {});
-
-    runner.on('pending', test => {
-      this.pending++;
+    runner.on('suite', suite => {
+      console.log('A A A A A A A A A A A SUITE:')
+      console.dir(suite)
     });
+
+    runner.on('hook end', hook => {
+      console.log('HOOK:')
+      console.dir(hook)
+    })
 
     runner.on('pass', test => {
       this.passes++;
@@ -71,7 +70,7 @@ export class CypressTestRailReporter extends reporters.Spec {
         return;
       }
       let executionDateTime = moment().format('MMM Do YYYY, HH:mm');
-      let totalCases = this.passes + this.fails + this.pending;
+      let totalCases = this.passes + this.fails;
       const momentDuration = moment.duration(this.durationInMs);
       const totalDuration = `${
         momentDuration.hours() ? momentDuration.hours() + ' hours ' : ''
@@ -82,7 +81,6 @@ Execution summary:
 Duration: ${totalDuration}
 Passes: ${this.passes}
 Fails: ${this.fails}
-Pending: ${this.pending}
 Total: ${totalCases}`;
       new TestRail(reporterOptions).publish(name, description, this.results);
     });

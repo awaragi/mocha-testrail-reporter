@@ -1,9 +1,8 @@
-##Testrail Reporter for Cypress
+# Testrail Reporter for Cypress
 
-Pushes test results into Testrail system.
-Forked from [mocha testrail reporter](https://www.npmjs.com/package/mocha-testrail-reporter)
+Pushes test results into TestRail system.
 
-## Installation
+## Install
 
 ```shell
 $ npm i -D cypress-testrail-reporter
@@ -11,9 +10,7 @@ $ npm i -D cypress-testrail-reporter
 
 ## Usage
 
-Ensure that your testrail installation API is enabled and generate your API keys. See [Username and API Key](http://docs.gurock.com/testrail-api2/accessing#username_and_api_key)
-
-Add reporter to `cypress.json`:
+Add reporter to the `cypress.json`:
 
 ```json
 "reporter": "cypress-testrail-reporter",
@@ -23,36 +20,48 @@ Add reporter to `cypress.json`:
   "password": "password",
   "projectId": 1,
   "suiteId": 1,
-  "runName": "Cypress test run"
 }
 ```
 
-Mark your Cypress test names with ID of a Testrail test cases. Ensure that your case ids are well distinct from test descriptions.
+Your Cypress tests should include ID of a TestRail test cases. Make sure your test case ids are distinct from the test titles:
 
 ```Javascript
-it("C123 C124 Authenticate with invalid user", . . .
-it("Authenticate a valid user C321", . . .
+it("C123 C124 Can authenticate with invalid user", . . .
+it("Can authenticate a valid user C321", . . .
 ```
 
-Only passed or failed tests will be published. Skipped or pending tests will not be published resulting in a "Pending" status in testrail test run.
+## Reporter Options
 
-## Options
-
-**domain**: _string_ domain name of your Testrail instance (e.g. for a hosted instance instance.testrail.net)
+**domain**: _string_ domain name of your TestRail instance (e.g. for a hosted instance instance.testrail.net)
 
 **username**: _string_ email of a user under which the test run will be created
 
 **password**: _string_ password or the API key for the aforementioned user
 
-**projectId**: _number_ projet number with which the tests are associated
+**projectId**: _number_ projet with which the tests are associated
 
-**suiteId**: _number_ suite number with which the tests are associated
+**suiteId**: _number_ suite with which the tests are associated
 
-**runName**: _number_ (optional) name of the Testrail run
+**runName**: _string_ (optional) name of the Testrail run
 
-## References
+## TestRail Settings
 
-* https://github.com/awaragi/mocha-testrail-reporter
-* http://mochajs.org/#mochaopts
-* https://github.com/mochajs/mocha/wiki/Third-party-reporters
-* http://docs.gurock.com/testrail-api2/start
+To increase security, TestRail team suggests using an API key instead of the password. You can see how to generate an API key [here](http://docs.gurock.com/testrail-api2/accessing#username_and_api_key)
+
+If you maintain your own TestRail instance on your own server, it is recommended to [enable HTTPS for your TestRail installation](http://docs.gurock.com/testrail-admin/admin-securing#using_https)
+
+For TestRail Hosted accounts maintained by [Gurock](http://www.gurock.com/), all accounts will automatically use HTTPS.
+
+You can read the whole TestRail documentation [here](http://docs.gurock.com/)
+
+## Authors
+
+* **Milutin Savovic** - *Initial setup* - [github](https://github.com/mickosav)
+
+## License
+
+This project is licensed under the MIT License
+
+## Acknowledgments
+
+* [Pierre Awaragi](https://github.com/awaragi) who owns the [mocha-testrail-reporter](https://github.com/awaragi/mocha-testrail-reporter) repository that was forked
