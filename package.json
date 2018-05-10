@@ -1,5 +1,5 @@
 {
-  "name": "mocha-testrail-reporter",
+  "name": "cypress-testrail-reporter",
   "version": "1.0.12",
   "description": "A Testrail reporter for mocha including TestRail API basic library",
   "main": "index.js",
@@ -10,22 +10,21 @@
     "reporter"
   ],
   "author": {
-    "name": "Pierre Awaragi",
-    "email": "pierre@awaragi.com"
+    "name": "Milutin Savovic",
+    "email": "mickosavovic@gmail.com"
   },
   "license": "MIT",
   "readmeFilename": "README.md",
   "repository": {
     "type": "git",
-    "url": "https://github.com/awaragi/mocha-testrail-reporter.git"
+    "url": "https://github.com/mickosav/cypress-testrail-reporter.git"
   },
   "bugs": {
-    "url": "https://github.com/awaragi/mocha-testrail-reporter/issues"
+    "url": "https://github.com/mickosav/cypress-testrail-reporter/issues"
   },
   "scripts": {
     "tsc": "tsc",
     "clean": "rimraf dist",
-    "test": "mocha dist/test",
     "build": "npm run clean && npm run tsc"
   },
   "dependencies": {
