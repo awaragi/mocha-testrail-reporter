@@ -20,15 +20,15 @@ export class CypressTestRailReporter extends reporters.Spec {
     this.validate(reporterOptions, 'projectId');
     this.validate(reporterOptions, 'suiteId');
 
-    runner.on('suite', suite => {
+    runner.on('suite end', suite => {
       console.log('A A A A A A A A A A A SUITE:')
       console.dir(suite)
     });
 
-    runner.on('hook end', hook => {
-      console.log('HOOK:')
-      console.dir(hook)
-    })
+    // runner.on('hook end', hook => {
+    //   console.log('HOOK:')
+    //   console.dir(hook)
+    // })
 
     runner.on('pass', test => {
       this.passes++;

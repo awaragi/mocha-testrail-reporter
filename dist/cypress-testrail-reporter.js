@@ -29,14 +29,14 @@ var CypressTestRailReporter = /** @class */ (function (_super) {
         _this.validate(reporterOptions, 'password');
         _this.validate(reporterOptions, 'projectId');
         _this.validate(reporterOptions, 'suiteId');
-        runner.on('suite', function (suite) {
+        runner.on('suite end', function (suite) {
             console.log('A A A A A A A A A A A SUITE:');
             console.dir(suite);
         });
-        runner.on('hook end', function (hook) {
-            console.log('HOOK:');
-            console.dir(hook);
-        });
+        // runner.on('hook end', hook => {
+        //   console.log('HOOK:')
+        //   console.dir(hook)
+        // })
         runner.on('pass', function (test) {
             _this.passes++;
             _this.durationInMs += test.duration;
