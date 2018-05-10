@@ -29,15 +29,8 @@ var CypressTestRailReporter = /** @class */ (function (_super) {
         _this.validate(reporterOptions, 'password');
         _this.validate(reporterOptions, 'projectId');
         _this.validate(reporterOptions, 'suiteId');
-        runner.on('suite end', function (suite) {
-            console.log('A A A A A A A A A A A SUITE:');
-            console.dir(suite);
-            if (suite.tests) {
-            }
-        });
         runner.on('hook end', function (hook) {
-            console.log('HOOK:');
-            console.dir(hook);
+            _this.durationInMs += hook.duration;
         });
         runner.on('pass', function (test) {
             _this.passes++;
