@@ -4,4 +4,3 @@ node-debug*
 *.iml
 .idea/
 npm-debug.log
-dist
