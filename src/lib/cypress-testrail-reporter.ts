@@ -36,7 +36,6 @@ export class CypressTestRailReporter extends reporters.Spec {
       this.passes++;
       this.out.push(test.fullTitle() + ': pass');
       let caseIds = titleToCaseIds(test.title);
-      console.dir(test.speed)
       if (caseIds.length > 0) {
         if (test.speed === 'fast') {
           let results = caseIds.map(caseId => {
@@ -52,7 +51,7 @@ export class CypressTestRailReporter extends reporters.Spec {
             return {
               case_id: caseId,
               status_id: Status.Passed,
-              comment: `${test.title} (${test.duration}ms)`,
+              comment: `Execution time: ${test.duration}ms`,
             };
           });
           this.results.push(...results);
@@ -64,14 +63,13 @@ export class CypressTestRailReporter extends reporters.Spec {
       this.fails++;
       this.out.push(test.fullTitle() + ': fail');
       let caseIds = titleToCaseIds(test.title);
-      console.dir(test.err)
       if (caseIds.length > 0) {
         let results = caseIds.map(caseId => {
           return {
             case_id: caseId,
             status_id: Status.Failed,
-            comment: `${test.title}
-${test.err}`,
+            comment: `${test.err.message}
+${test.err.stack}`,
           };
         });
         this.results.push(...results);

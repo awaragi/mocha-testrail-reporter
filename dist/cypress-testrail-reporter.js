@@ -41,7 +41,6 @@ var CypressTestRailReporter = /** @class */ (function (_super) {
             _this.passes++;
             _this.out.push(test.fullTitle() + ': pass');
             var caseIds = shared_1.titleToCaseIds(test.title);
-            console.dir(test.speed);
             if (caseIds.length > 0) {
                 if (test.speed === 'fast') {
                     var results = caseIds.map(function (caseId) {
@@ -58,7 +57,7 @@ var CypressTestRailReporter = /** @class */ (function (_super) {
                         return {
                             case_id: caseId,
                             status_id: testrail_interface_1.Status.Passed,
-                            comment: test.title + " (" + test.duration + "ms)",
+                            comment: "Execution time: " + test.duration + "ms",
                         };
                     });
                     (_b = _this.results).push.apply(_b, results);
@@ -70,13 +69,12 @@ var CypressTestRailReporter = /** @class */ (function (_super) {
             _this.fails++;
             _this.out.push(test.fullTitle() + ': fail');
             var caseIds = shared_1.titleToCaseIds(test.title);
-            console.dir(test.err);
             if (caseIds.length > 0) {
                 var results = caseIds.map(function (caseId) {
                     return {
                         case_id: caseId,
                         status_id: testrail_interface_1.Status.Failed,
-                        comment: test.title + "\n" + test.err,
+                        comment: test.err.message + "\n" + test.err.stack,
                     };
                 });
                 (_a = _this.results).push.apply(_a, results);
