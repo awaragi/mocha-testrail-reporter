@@ -14,7 +14,7 @@ export class MochaTestRailReporter extends reporters.Spec {
     constructor(runner: any, options: any) {
         super(runner);
 
-        let reporterOptions: TestRailOptions = <TestRailOptions>options.reporterOptions;
+        let reporterOptions = options.reporterOptions;
         this.validate(reporterOptions, 'domain');
         this.validate(reporterOptions, 'username');
         this.validate(reporterOptions, 'password');
@@ -68,6 +68,7 @@ export class MochaTestRailReporter extends reporters.Spec {
             let caseIds = titleToCaseIds(test.title);
             if (caseIds.length > 0) {
                 let results = caseIds.map(caseId => {
+                    console.dir(test.title)
                     return {
                         case_id: caseId,
                         status_id: Status.Failed,
@@ -100,7 +101,7 @@ ${this.out.join('\n')}
         });
     }
 
-    private validate(options: TestRailOptions, name: string) {
+    private validate(options, name: string) {
         if (options == null) {
             throw new Error("Missing --reporter-options in mocha.opts");
         }
