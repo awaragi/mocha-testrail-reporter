@@ -85,7 +85,7 @@ ${test.err}`,
         );
         return;
       }
-      let executionDateTime = moment().format('MMM Do YYYY, HH:mm')
+      let executionDateTime = moment().format('MMM Do YYYY, HH:mm');
       let total = this.passes + this.fails + this.pending;
       let name = `${reporterOptions.runName || 'Automated test run'} ${executionDateTime}`;
       let description = `Automated test run executed on ${executionDateTime}
