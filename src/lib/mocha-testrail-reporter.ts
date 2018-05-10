@@ -63,12 +63,12 @@ export class MochaTestRailReporter extends reporters.Spec {
         });
 
         runner.on('fail', (test) => {
+            console.log('FAAAAAAAAAIIIIIILLL')
             this.fails++;
             this.out.push(test.fullTitle() + ': fail');
             let caseIds = titleToCaseIds(test.title);
             if (caseIds.length > 0) {
                 let results = caseIds.map(caseId => {
-                    console.dir(test.title)
                     return {
                         case_id: caseId,
                         status_id: Status.Failed,
