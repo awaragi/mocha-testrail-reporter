@@ -70,12 +70,14 @@ export class CypressTestRailReporter extends reporters.Spec {
         momentDuration.hours() ? momentDuration.hours() + ' hours ' : ''
       }${momentDuration.minutes()} min ${momentDuration.seconds()} sec`;
       const name = `${reporterOptions.runName || 'Automated test run'} ${executionDateTime}`;
-      const description = `For the full details visit https://dashboard.cypress.io/#/projects/runs
-**Execution summary:**
+      const description = `# Execution summary: #
   - Duration: ${totalDuration}
   - Passed: ${this.passes}
   - Failed: ${this.fails}
-  - Total: ${totalCases}`;
+  - Total: ${totalCases}
+  
+  For the full test run visit https://dashboard.cypress.io/#/projects/runs
+`;
       new TestRail(reporterOptions).publish(name, description, this.results);
     });
   }

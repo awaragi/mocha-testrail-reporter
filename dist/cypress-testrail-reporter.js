@@ -74,7 +74,7 @@ var CypressTestRailReporter = /** @class */ (function (_super) {
             var momentDuration = moment.duration(_this.durationInMs);
             var totalDuration = "" + (momentDuration.hours() ? momentDuration.hours() + ' hours ' : '') + momentDuration.minutes() + " min " + momentDuration.seconds() + " sec";
             var name = (reporterOptions.runName || 'Automated test run') + " " + executionDateTime;
-            var description = "For the full details visit https://dashboard.cypress.io/#/projects/runs\n**Execution summary:**\n  - Duration: " + totalDuration + "\n  - Passed: " + _this.passes + "\n  - Failed: " + _this.fails + "\n  - Total: " + totalCases;
+            var description = "# Execution summary: #\n  - Duration: " + totalDuration + "\n  - Passed: " + _this.passes + "\n  - Failed: " + _this.fails + "\n  - Total: " + totalCases + "\n  \n  For the full test run visit https://dashboard.cypress.io/#/projects/runs\n";
             new testrail_1.TestRail(reporterOptions).publish(name, description, _this.results);
         });
         return _this;
