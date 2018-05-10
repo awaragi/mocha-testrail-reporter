@@ -1,6 +1,6 @@
 # Testrail Reporter for Cypress
 
-Pushes test results into TestRail system.
+Publishes [Cypress](https://www.cypress.io/) runs on TestRail
 
 ## Install
 
@@ -13,6 +13,7 @@ $ npm i -D cypress-testrail-reporter
 Add reporter to the `cypress.json`:
 
 ```json
+...
 "reporter": "cypress-testrail-reporter",
 "reporterOptions": {
   "domain": "yourdomain.testrail.com",
