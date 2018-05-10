@@ -66,11 +66,12 @@ export class CypressTestRailReporter extends reporters.Spec {
       const executionDateTime = moment().format('MMM Do YYYY, HH:mm (Z)');
       const totalCases = this.passes + this.fails;
       const momentDuration = moment.duration(this.durationInMs);
-      const totalDuration = `${momentDuration.hours() + ' hours ' ||
-        ''}${momentDuration.minutes()} min ${momentDuration.seconds()} sec`;
-        const name = `${reporterOptions.runName || 'Automated test run'} ${executionDateTime}`;
-        const description = `**${name} ${executionDateTime}**
-Execution summary:
+      const totalDuration = `${
+        momentDuration.hours() ? momentDuration.hours() + ' hours ' : ''
+      }${momentDuration.minutes()} min ${momentDuration.seconds()} sec`;
+      const name = `${reporterOptions.runName || 'Automated test run'} ${executionDateTime}`;
+      const description = `For the full details visit https://dashboard.cypress.io/#/projects/runs
+**Execution summary:**
   - Duration: ${totalDuration}
   - Passed: ${this.passes}
   - Failed: ${this.fails}
