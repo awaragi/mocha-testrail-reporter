@@ -23,7 +23,7 @@ var CypressTestRailReporter = /** @class */ (function (_super) {
         _this.passes = 0;
         _this.fails = 0;
         _this.pending = 0;
-        _this.out = [];
+        _this.durationInMs = 0;
         var reporterOptions = options.reporterOptions;
         _this.validate(reporterOptions, 'domain');
         _this.validate(reporterOptions, 'username');
@@ -35,46 +35,33 @@ var CypressTestRailReporter = /** @class */ (function (_super) {
         runner.on('suite end', function () { });
         runner.on('pending', function (test) {
             _this.pending++;
-            _this.out.push(test.fullTitle() + ': pending');
         });
         runner.on('pass', function (test) {
             _this.passes++;
-            _this.out.push(test.fullTitle() + ': pass');
+            _this.durationInMs += test.duration;
             var caseIds = shared_1.titleToCaseIds(test.title);
             if (caseIds.length > 0) {
-                if (test.speed === 'fast') {
-                    var results = caseIds.map(function (caseId) {
-                        return {
-                            case_id: caseId,
-                            status_id: testrail_interface_1.Status.Passed,
-                            comment: test.title,
-                        };
-                    });
-                    (_a = _this.results).push.apply(_a, results);
-                }
-                else {
-                    var results = caseIds.map(function (caseId) {
-                        return {
-                            case_id: caseId,
-                            status_id: testrail_interface_1.Status.Passed,
-                            comment: "Execution time: " + test.duration + "ms",
-                        };
-                    });
-                    (_b = _this.results).push.apply(_b, results);
-                }
+                var results = caseIds.map(function (caseId) {
+                    return {
+                        case_id: caseId,
+                        status_id: testrail_interface_1.Status.Passed,
+                        comment: "Execution time: " + test.duration + "ms",
+                    };
+                });
+                (_a = _this.results).push.apply(_a, results);
             }
-            var _a, _b;
+            var _a;
         });
         runner.on('fail', function (test) {
             _this.fails++;
-            _this.out.push(test.fullTitle() + ': fail');
+            _this.durationInMs += test.duration;
             var caseIds = shared_1.titleToCaseIds(test.title);
             if (caseIds.length > 0) {
                 var results = caseIds.map(function (caseId) {
                     return {
                         case_id: caseId,
                         status_id: testrail_interface_1.Status.Failed,
-                        comment: test.err.message + "\n" + test.err.stack,
+                        comment: "" + test.err.message,
                     };
                 });
                 (_a = _this.results).push.apply(_a, results);
@@ -87,9 +74,10 @@ var CypressTestRailReporter = /** @class */ (function (_super) {
                 return;
             }
             var executionDateTime = moment().format('MMM Do YYYY, HH:mm');
-            var total = _this.passes + _this.fails + _this.pending;
+            var totalCases = _this.passes + _this.fails + _this.pending;
+            var totalDuration = moment().set('millisecond', _this.durationInMs).format('mm min ss sec');
             var name = (reporterOptions.runName || 'Automated test run') + " " + executionDateTime;
-            var description = "Automated test run executed on " + executionDateTime + "\nExecution summary:\nPasses: " + _this.passes + "\nFails: " + _this.fails + "\nPending: " + _this.pending + "\nTotal: " + total + "\n\nExecution details:\n" + _this.out.join('\n') + "                     \n";
+            var description = "Automated test run executed on " + executionDateTime + "\nExecution summary:\nDuration: " + totalDuration + "\nPasses: " + _this.passes + "\nFails: " + _this.fails + "\nPending: " + _this.pending + "\nTotal: " + totalCases;
             new testrail_1.TestRail(reporterOptions).publish(name, description, _this.results);
         });
         return _this;

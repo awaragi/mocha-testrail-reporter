@@ -1,36 +1,34 @@
-#Testrail Reporter for Mocha
-
-[![npm version](https://badge.fury.io/js/mocha-testrail-reporter.svg)](https://badge.fury.io/js/mocha-testrail-reporter)
+##Testrail Reporter for Cypress
 
 Pushes test results into Testrail system.
+Forked from [mocha testrail reporter](https://www.npmjs.com/package/mocha-testrail-reporter)
 
 ## Installation
 
 ```shell
-$ npm install mocha-testrail-reporter --save-dev
+$ npm i -D cypress-testrail-reporter
 ```
 
 ## Usage
-Ensure that your testrail installation API is enabled and generate your API keys. See http://docs.gurock.com/
 
-Run mocha with `mocha-testrail-reporter`:
+Ensure that your testrail installation API is enabled and generate your API keys. See [Username and API Key](http://docs.gurock.com/testrail-api2/accessing#username_and_api_key)
 
-```shell
-$ mocha test --reporter mocha-testrail-reporter --reporter-options domain=instance.testrail.net,username=test@example.com,password=12345678,projectId=1,suiteId=1
+Add reporter to `cypress.json`:
+
+```json
+"reporter": "cypress-testrail-reporter",
+"reporterOptions": {
+  "domain": "yourdomain.testrail.com",
+  "username": "username",
+  "password": "password",
+  "projectId": 1,
+  "suiteId": 1,
+  "runName": "Cypress test run"
+}
 ```
 
-or use a mocha.options file
-```shell
-mocha --opts mocha-testrail.opts build/test
---recursive
---reporter mocha-testrail-reporter
---reporter-options domain=instance.testrail.net,username=test@example.com,password=12345678,projectId=1,suiteId=1
---no-exit
-```
+Mark your Cypress test names with ID of a Testrail test cases. Ensure that your case ids are well distinct from test descriptions.
 
-
-Mark your mocha test names with ID of Testrail test cases. Ensure that your case ids are well distinct from test descriptions.
- 
 ```Javascript
 it("C123 C124 Authenticate with invalid user", . . .
 it("Authenticate a valid user C321", . . .
@@ -40,19 +38,21 @@ Only passed or failed tests will be published. Skipped or pending tests will not
 
 ## Options
 
-**domain**: *string* domain name of your Testrail instance (e.g. for a hosted instance instance.testrail.net)
+**domain**: _string_ domain name of your Testrail instance (e.g. for a hosted instance instance.testrail.net)
 
-**username**: *string* user under which the test run will be created (e.g. jenkins or ci)
+**username**: _string_ email of a user under which the test run will be created
 
-**password**: *string* password or API token for user
+**password**: _string_ password or the API key for the aforementioned user
 
-**projectId**: *number* projet number with which the tests are associated
+**projectId**: _number_ projet number with which the tests are associated
 
-**suiteId**: *number* suite number with which the tests are associated
+**suiteId**: _number_ suite number with which the tests are associated
 
-**assignedToId**: *number* (optional) user id which will be assigned failed tests
+**runName**: _number_ (optional) name of the Testrail run
 
 ## References
-- http://mochajs.org/#mochaopts
-- https://github.com/mochajs/mocha/wiki/Third-party-reporters
-- http://docs.gurock.com/testrail-api2/start
+
+* https://github.com/awaragi/mocha-testrail-reporter
+* http://mochajs.org/#mochaopts
+* https://github.com/mochajs/mocha/wiki/Third-party-reporters
+* http://docs.gurock.com/testrail-api2/start

@@ -1,5 +1,5 @@
 import { reporters } from 'mocha';
-import * as moment from 'moment'
+import * as moment from 'moment';
 import { TestRail } from './testrail';
 import { titleToCaseIds } from './shared';
 import { Status, TestRailResult } from './testrail.interface';
@@ -9,7 +9,7 @@ export class CypressTestRailReporter extends reporters.Spec {
   private passes: number = 0;
   private fails: number = 0;
   private pending: number = 0;
-  private out: string[] = [];
+  private durationInMs: number = 0;
 
   constructor(runner: any, options: any) {
     super(runner);
@@ -29,47 +29,34 @@ export class CypressTestRailReporter extends reporters.Spec {
 
     runner.on('pending', test => {
       this.pending++;
-      this.out.push(test.fullTitle() + ': pending');
     });
 
     runner.on('pass', test => {
       this.passes++;
-      this.out.push(test.fullTitle() + ': pass');
+      this.durationInMs += test.duration;
       let caseIds = titleToCaseIds(test.title);
       if (caseIds.length > 0) {
-        if (test.speed === 'fast') {
-          let results = caseIds.map(caseId => {
-            return {
-              case_id: caseId,
-              status_id: Status.Passed,
-              comment: test.title,
-            };
-          });
-          this.results.push(...results);
-        } else {
-          let results = caseIds.map(caseId => {
-            return {
-              case_id: caseId,
-              status_id: Status.Passed,
-              comment: `Execution time: ${test.duration}ms`,
-            };
-          });
-          this.results.push(...results);
-        }
+        let results = caseIds.map(caseId => {
+          return {
+            case_id: caseId,
+            status_id: Status.Passed,
+            comment: `Execution time: ${test.duration}ms`,
+          };
+        });
+        this.results.push(...results);
       }
     });
 
     runner.on('fail', test => {
       this.fails++;
-      this.out.push(test.fullTitle() + ': fail');
+      this.durationInMs += test.duration;
       let caseIds = titleToCaseIds(test.title);
       if (caseIds.length > 0) {
         let results = caseIds.map(caseId => {
           return {
             case_id: caseId,
             status_id: Status.Failed,
-            comment: `${test.err.message}
-${test.err.stack}`,
+            comment: `${test.err.message}`,
           };
         });
         this.results.push(...results);
@@ -84,18 +71,16 @@ ${test.err.stack}`,
         return;
       }
       let executionDateTime = moment().format('MMM Do YYYY, HH:mm');
-      let total = this.passes + this.fails + this.pending;
+      let totalCases = this.passes + this.fails + this.pending;
+      const totalDuration = moment().set('millisecond', this.durationInMs).format('mm min ss sec')
       let name = `${reporterOptions.runName || 'Automated test run'} ${executionDateTime}`;
       let description = `Automated test run executed on ${executionDateTime}
 Execution summary:
+Duration: ${totalDuration}
 Passes: ${this.passes}
 Fails: ${this.fails}
 Pending: ${this.pending}
-Total: ${total}
-
-Execution details:
-${this.out.join('\n')}                     
-`;
+Total: ${totalCases}`;
       new TestRail(reporterOptions).publish(name, description, this.results);
     });
   }
