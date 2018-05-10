@@ -24,7 +24,7 @@ Add reporter to the `cypress.json`:
 }
 ```
 
-Your Cypress tests should include ID of a TestRail test cases. Make sure your test case ids are distinct from the test titles:
+Your Cypress test should include the ID of a TestRail test case. Make sure your test case ids are distinct from the test titles:
 
 ```Javascript
 it("C123 C124 Can authenticate with invalid user", . . .
@@ -39,7 +39,7 @@ it("Can authenticate a valid user C321", . . .
 
 **password**: _string_ password or the API key for the aforementioned user
 
-**projectId**: _number_ projet with which the tests are associated
+**projectId**: _number_ project with which the tests are associated
 
 **suiteId**: _number_ suite with which the tests are associated
 
@@ -51,13 +51,13 @@ To increase security, TestRail team suggests using an API key instead of the pas
 
 If you maintain your own TestRail instance on your own server, it is recommended to [enable HTTPS for your TestRail installation](http://docs.gurock.com/testrail-admin/admin-securing#using_https)
 
-For TestRail Hosted accounts maintained by [Gurock](http://www.gurock.com/), all accounts will automatically use HTTPS.
+For TestRail hosted accounts maintained by [Gurock](http://www.gurock.com/), all accounts will automatically use HTTPS.
 
 You can read the whole TestRail documentation [here](http://docs.gurock.com/)
 
 ## Authors
 
-* **Milutin Savovic** - *Initial setup* - [github](https://github.com/mickosav)
+* **Milutin Savovic** - _Initial setup_ - [github](https://github.com/mickosav)
 
 ## License
 
@@ -66,3 +66,4 @@ This project is licensed under the MIT License
 ## Acknowledgments
 
 * [Pierre Awaragi](https://github.com/awaragi) who owns the [mocha-testrail-reporter](https://github.com/awaragi/mocha-testrail-reporter) repository that was forked
+* [Valerie Thoma](https://github.com/ValerieThoma) proofreading the README.md file and making it more understandable
