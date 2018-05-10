@@ -75,9 +75,8 @@ export class CypressTestRailReporter extends reporters.Spec {
   - Passed: ${this.passes}
   - Failed: ${this.fails}
   - Total: ${totalCases}
-  
-  For the full test run visit https://dashboard.cypress.io/#/projects/runs
-`;
+
+  For the full test run visit https://dashboard.cypress.io/#/projects/runs`;
       new TestRail(reporterOptions).publish(name, description, this.results);
     });
   }
