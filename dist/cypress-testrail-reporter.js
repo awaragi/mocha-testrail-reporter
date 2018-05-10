@@ -32,11 +32,13 @@ var CypressTestRailReporter = /** @class */ (function (_super) {
         runner.on('suite end', function (suite) {
             console.log('A A A A A A A A A A A SUITE:');
             console.dir(suite);
+            if (suite.tests) {
+            }
         });
-        // runner.on('hook end', hook => {
-        //   console.log('HOOK:')
-        //   console.dir(hook)
-        // })
+        runner.on('hook end', function (hook) {
+            console.log('HOOK:');
+            console.dir(hook);
+        });
         runner.on('pass', function (test) {
             _this.passes++;
             _this.durationInMs += test.duration;

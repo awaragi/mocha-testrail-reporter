@@ -23,12 +23,15 @@ export class CypressTestRailReporter extends reporters.Spec {
     runner.on('suite end', suite => {
       console.log('A A A A A A A A A A A SUITE:')
       console.dir(suite)
+      if (suite.tests) {
+        
+      }
     });
 
-    // runner.on('hook end', hook => {
-    //   console.log('HOOK:')
-    //   console.dir(hook)
-    // })
+    runner.on('hook end', hook => {
+      console.log('HOOK:')
+      console.dir(hook)
+    })
 
     runner.on('pass', test => {
       this.passes++;
