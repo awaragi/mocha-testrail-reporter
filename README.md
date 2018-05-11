@@ -28,7 +28,7 @@ Add reporter to your `cypress.json`:
 }
 ```
 
-Your Cypress test should include the ID of your TestRail test case. Make sure your test case IDs are distinct from your test titles:
+Your Cypress tests should include the ID of your TestRail test case. Make sure your test case IDs are distinct from your test titles:
 
 ```Javascript
 // Good:
@@ -42,7 +42,7 @@ it("Can authenticate a valid userC123", ...
 
 ## Reporter Options
 
-**domain**: _string_ domain name of your TestRail instance (e.g. for a hosted instance instance.testrail.net).
+**domain**: _string_ domain name of your TestRail instance (e.g. for a hosted instance instance.testrail.com).
 
 **username**: _string_ email of the user under which the test run will be created.
 
