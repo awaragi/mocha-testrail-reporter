@@ -1,5 +1,9 @@
 # TestRail Reporter for Cypress
 
+[![version](https://img.shields.io/npm/v/cypress-testrail-reporter.svg)](https://www.npmjs.com/package/cypress-testrail-reporter)
+[![downloads](https://img.shields.io/npm/dt/cypress-testrail-reporter.svg)](https://www.npmjs.com/package/cypress-testrail-reporter)
+[![MIT License](https://img.shields.io/github/license/Vivify-Ideas/cypress-testrail-reporter.svg)](https://github.com/Vivify-Ideas/cypress-testrail-reporter/blob/master/LICENSE.md)
+
 Publishes [Cypress](https://www.cypress.io/) runs on TestRail
 
 ## Install
@@ -10,7 +14,7 @@ $ npm i -D cypress-testrail-reporter
 
 ## Usage
 
-Add reporter to the `cypress.json`:
+Add reporter to your `cypress.json`:
 
 ```json
 ...
@@ -24,7 +28,7 @@ Add reporter to the `cypress.json`:
 }
 ```
 
-Your Cypress test should include the ID of a TestRail test case. Make sure your test case IDs are distinct from the test titles:
+Your Cypress test should include the ID of your TestRail test case. Make sure your test case IDs are distinct from your test titles:
 
 ```Javascript
 // Good:
@@ -40,7 +44,7 @@ it("Can authenticate a valid userC123", ...
 
 **domain**: _string_ domain name of your TestRail instance (e.g. for a hosted instance instance.testrail.net)
 
-**username**: _string_ email of a user under which the test run will be created
+**username**: _string_ email of the user under which the test run will be created
 
 **password**: _string_ password or the API key for the aforementioned user
 
@@ -52,7 +56,7 @@ it("Can authenticate a valid userC123", ...
 
 ## TestRail Settings
 
-To increase security, TestRail team suggests using an API key instead of the password. You can see how to generate an API key [here](http://docs.gurock.com/testrail-api2/accessing#username_and_api_key)
+To increase security, the TestRail team suggests using an API key instead of a password. You can see how to generate an API key [here](http://docs.gurock.com/testrail-api2/accessing#username_and_api_key)
 
 If you maintain your own TestRail instance on your own server, it is recommended to [enable HTTPS for your TestRail installation](http://docs.gurock.com/testrail-admin/admin-securing#using_https)
 
@@ -66,7 +70,7 @@ You can read the whole TestRail documentation [here](http://docs.gurock.com/)
 
 ## License
 
-This project is licensed under the MIT License
+This project is licensed under the [MIT license](/LICENSE.md).
 
 ## Acknowledgments
 
