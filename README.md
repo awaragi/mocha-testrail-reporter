@@ -27,8 +27,8 @@ Add reporter to the `cypress.json`:
 Your Cypress test should include the ID of a TestRail test case. Make sure your test case IDs are distinct from the test titles:
 
 ```Javascript
-it("C123 C124 Can authenticate with invalid user", . . .
-it("Can authenticate a valid user C321", . . .
+it("C123 C124 Can authenticate with invalid user", ...
+it("Can authenticate a valid user C321", ...
 ```
 
 ## Reporter Options
