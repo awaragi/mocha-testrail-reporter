@@ -42,7 +42,7 @@ it("Can authenticate a valid userC123", ...
 
 ## Reporter Options
 
-**domain**: _string_ domain name of your TestRail instance (e.g. for a hosted instance instance.testrail.com).
+**domain**: _string_ domain name of your TestRail instance (e.g. for a hosted instance _instance.testrail.com_).
 
 **username**: _string_ email of the user under which the test run will be created.
 
