@@ -17,10 +17,10 @@
   "readmeFilename": "README.md",
   "repository": {
     "type": "git",
-    "url": "https://github.com/mickosav/cypress-testrail-reporter.git"
+    "url": "https://github.com/Vivify-Ideas/cypress-testrail-reporter.git"
   },
   "bugs": {
-    "url": "https://github.com/mickosav/cypress-testrail-reporter/issues"
+    "url": "https://github.com/Vivify-Ideas/cypress-testrail-reporter/issues"
   },
   "scripts": {
     "tsc": "tsc",
