@@ -4,12 +4,12 @@
 [![downloads](https://img.shields.io/npm/dt/cypress-testrail-reporter.svg)](https://www.npmjs.com/package/cypress-testrail-reporter)
 [![MIT License](https://img.shields.io/github/license/Vivify-Ideas/cypress-testrail-reporter.svg)](https://github.com/Vivify-Ideas/cypress-testrail-reporter/blob/master/LICENSE.md)
 
-Publishes [Cypress](https://www.cypress.io/) runs on TestRail
+Publishes [Cypress](https://www.cypress.io/) runs on TestRail.
 
 ## Install
 
 ```shell
-$ npm i -D cypress-testrail-reporter
+$ npm install cypress-testrail-reporter --save-dev
 ```
 
 ## Usage
@@ -42,31 +42,31 @@ it("Can authenticate a valid userC123", ...
 
 ## Reporter Options
 
-**domain**: _string_ domain name of your TestRail instance (e.g. for a hosted instance instance.testrail.net)
+**domain**: _string_ domain name of your TestRail instance (e.g. for a hosted instance instance.testrail.net).
 
-**username**: _string_ email of the user under which the test run will be created
+**username**: _string_ email of the user under which the test run will be created.
 
-**password**: _string_ password or the API key for the aforementioned user
+**password**: _string_ password or the API key for the aforementioned user.
 
-**projectId**: _number_ project with which the tests are associated
+**projectId**: _number_ project with which the tests are associated.
 
-**suiteId**: _number_ suite with which the tests are associated
+**suiteId**: _number_ suite with which the tests are associated.
 
-**runName**: _string_ (optional) name of the Testrail run
+**runName**: _string_ (optional) name of the Testrail run.
 
 ## TestRail Settings
 
-To increase security, the TestRail team suggests using an API key instead of a password. You can see how to generate an API key [here](http://docs.gurock.com/testrail-api2/accessing#username_and_api_key)
+To increase security, the TestRail team suggests using an API key instead of a password. You can see how to generate an API key [here](http://docs.gurock.com/testrail-api2/accessing#username_and_api_key).
 
-If you maintain your own TestRail instance on your own server, it is recommended to [enable HTTPS for your TestRail installation](http://docs.gurock.com/testrail-admin/admin-securing#using_https)
+If you maintain your own TestRail instance on your own server, it is recommended to [enable HTTPS for your TestRail installation](http://docs.gurock.com/testrail-admin/admin-securing#using_https).
 
 For TestRail hosted accounts maintained by [Gurock](http://www.gurock.com/), all accounts will automatically use HTTPS.
 
-You can read the whole TestRail documentation [here](http://docs.gurock.com/)
+You can read the whole TestRail documentation [here](http://docs.gurock.com/).
 
-## Authors
+## Author
 
-* **Milutin Savovic** - _Initial setup_ - [github](https://github.com/mickosav)
+Milutin Savovic - [github](https://github.com/mickosav)
 
 ## License
 
@@ -74,5 +74,5 @@ This project is licensed under the [MIT license](/LICENSE.md).
 
 ## Acknowledgments
 
-* [Pierre Awaragi](https://github.com/awaragi) who owns the [mocha-testrail-reporter](https://github.com/awaragi/mocha-testrail-reporter) repository that was forked
-* [Valerie Thoma](https://github.com/ValerieThoma) proofreading the README.md file and making it more understandable
+* [Pierre Awaragi](https://github.com/awaragi), owner of the [mocha-testrail-reporter](https://github.com/awaragi/mocha-testrail-reporter) repository that was forked.
+* [Valerie Thoma](https://github.com/ValerieThoma) and [Aileen Santos](https://github.com/asantos3026) for proofreading the README.md file and making it more understandable.
