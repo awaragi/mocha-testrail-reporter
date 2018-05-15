@@ -1,4 +1,4 @@
-import request = require('unirest');
+const request = require('unirest');
 import { TestRailOptions, TestRailResult } from './testrail.interface';
 
 /**
