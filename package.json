@@ -1,6 +1,6 @@
 {
   "name": "cypress-testrail-reporter",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "A Testrail reporter for cypress including TestRail API basic library",
   "main": "index.js",
   "private": false,
@@ -29,7 +29,8 @@
   },
   "dependencies": {
     "btoa": "^1.1.2",
-    "unirest": "^0.5.1"
+    "unirest": "^0.5.1",
+    "moment": "^2.22.1"
   },
   "peerDependencies": {
     "mocha": "^3 || ^2.2.5"
@@ -39,7 +40,6 @@
     "@types/mocha": "^2.2.36",
     "@types/node": "^6.0.58",
     "chai": "^3.5.0",
-    "moment": "^2.22.1",
     "rimraf": "^2.5.4",
     "typescript": "^2.1.4"
   }
