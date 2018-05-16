@@ -4,11 +4,7 @@
   "description": "A Testrail reporter for cypress including TestRail API basic library",
   "main": "index.js",
   "private": false,
-  "keywords": [
-    "cypress",
-    "testrail",
-    "reporter"
-  ],
+  "keywords": ["cypress", "testrail", "reporter"],
   "author": {
     "name": "Milutin Savovic",
     "email": "mickosavovic@gmail.com"

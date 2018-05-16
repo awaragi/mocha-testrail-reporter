@@ -43,8 +43,8 @@ export class TestRail {
       auth: {
         username: this.options.username,
         password: this.options.password,
-      }
-    }).catch(error => console.error(error))
+      },
+    }).catch(error => console.error(error));
   }
 
   public publishResults(results: TestRailResult[]) {
