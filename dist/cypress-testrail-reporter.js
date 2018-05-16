@@ -15,7 +15,7 @@ var moment = require("moment");
 var testrail_1 = require("./testrail");
 var shared_1 = require("./shared");
 var testrail_interface_1 = require("./testrail.interface");
-var chalk_1 = require("chalk");
+var chalk = require('chalk');
 var CypressTestRailReporter = /** @class */ (function (_super) {
     __extends(CypressTestRailReporter, _super);
     function CypressTestRailReporter(runner, options) {
@@ -64,7 +64,7 @@ var CypressTestRailReporter = /** @class */ (function (_super) {
         });
         runner.on('end', function () {
             if (_this.results.length == 0) {
-                console.log('\n', chalk_1.default.magenta.underline.bold('(TestRail Reporter)'));
+                console.log('\n', chalk.magenta.underline.bold('(TestRail Reporter)'));
                 console.warn('\n', 'No testcases were matched. Ensure that your tests are declared correctly and matches Cxxx', '\n');
                 _this.testRail.deleteRun();
                 return;

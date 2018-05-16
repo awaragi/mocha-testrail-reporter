@@ -3,7 +3,7 @@ import * as moment from 'moment';
 import { TestRail } from './testrail';
 import { titleToCaseIds } from './shared';
 import { Status, TestRailResult } from './testrail.interface';
-import chalk from 'chalk';
+const chalk = require('chalk');
 
 export class CypressTestRailReporter extends reporters.Spec {
   private results: TestRailResult[] = [];

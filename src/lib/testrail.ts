@@ -1,10 +1,7 @@
-import axios from 'axios';
-import chalk from 'chalk';
+const axios = require('axios');
+const chalk = require('chalk');
 import { TestRailOptions, TestRailResult } from './testrail.interface';
 
-/**
- * TestRail basic API wrapper
- */
 export class TestRail {
   private base: String;
   private runId: Number;

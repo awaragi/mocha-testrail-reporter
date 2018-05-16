@@ -1,10 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var axios_1 = require("axios");
-var chalk_1 = require("chalk");
-/**
- * TestRail basic API wrapper
- */
+var axios = require('axios');
+var chalk = require('chalk');
 var TestRail = /** @class */ (function () {
     function TestRail(options) {
         this.options = options;
@@ -12,7 +9,7 @@ var TestRail = /** @class */ (function () {
     }
     TestRail.prototype.createRun = function (name, description) {
         var _this = this;
-        axios_1.default({
+        axios({
             method: 'post',
             url: this.base + "/add_run/" + this.options.projectId,
             headers: { 'Content-Type': 'application/json' },
@@ -33,19 +30,19 @@ var TestRail = /** @class */ (function () {
             .catch(function (error) { return console.error(error); });
     };
     TestRail.prototype.deleteRun = function () {
-        axios_1.default({
+        axios({
             method: 'post',
             url: this.base + "/delete_run/" + this.runId,
             headers: { 'Content-Type': 'application/json' },
             auth: {
                 username: this.options.username,
                 password: this.options.password,
-            }
+            },
         }).catch(function (error) { return console.error(error); });
     };
     TestRail.prototype.publishResults = function (results) {
         var _this = this;
-        axios_1.default({
+        axios({
             method: 'post',
             url: this.base + "/add_results_for_cases/" + this.runId,
             headers: { 'Content-Type': 'application/json' },
@@ -56,8 +53,8 @@ var TestRail = /** @class */ (function () {
             data: JSON.stringify({ results: results }),
         })
             .then(function (response) {
-            console.log('\n', chalk_1.default.magenta.underline.bold('(TestRail Reporter)'));
-            console.log('\n', " - Results are published to " + chalk_1.default.magenta("https://" + _this.options.domain + "/index.php?/runs/view/" + _this.runId), '\n');
+            console.log('\n', chalk.magenta.underline.bold('(TestRail Reporter)'));
+            console.log('\n', " - Results are published to " + chalk.magenta("https://" + _this.options.domain + "/index.php?/runs/view/" + _this.runId), '\n');
         })
             .catch(function (error) { return console.error(error); });
     };
