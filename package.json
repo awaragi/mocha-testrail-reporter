@@ -1,39 +1,38 @@
 {
-  "name": "mocha-testrail-reporter",
-  "version": "1.0.12",
-  "description": "A Testrail reporter for mocha including TestRail API basic library",
+  "name": "cypress-testrail-reporter",
+  "version": "1.0.9",
+  "description": "A Testrail reporter for cypress including TestRail API basic library",
   "main": "index.js",
   "private": false,
   "keywords": [
-    "mocha",
+    "cypress",
     "testrail",
     "reporter"
   ],
   "author": {
-    "name": "Pierre Awaragi",
-    "email": "pierre@awaragi.com"
+    "name": "Milutin Savovic",
+    "email": "mickosavovic@gmail.com"
   },
   "license": "MIT",
   "readmeFilename": "README.md",
   "repository": {
     "type": "git",
-    "url": "https://github.com/awaragi/mocha-testrail-reporter.git"
+    "url": "https://github.com/Vivify-Ideas/cypress-testrail-reporter.git"
   },
   "bugs": {
-    "url": "https://github.com/awaragi/mocha-testrail-reporter/issues"
+    "url": "https://github.com/Vivify-Ideas/cypress-testrail-reporter/issues"
   },
   "scripts": {
     "tsc": "tsc",
     "clean": "rimraf dist",
-    "test": "mocha dist/test",
     "build": "npm run clean && npm run tsc"
   },
   "dependencies": {
+    "axios": "^0.18.0",
     "btoa": "^1.1.2",
-    "unirest": "^0.5.1"
-  },
-  "peerDependencies": {
-    "mocha": "^3 || ^2.2.5"
+    "chalk": "^2.4.1",
+    "mocha": "^2.2.5",
+    "moment": "^2.22.1"
   },
   "devDependencies": {
     "@types/chai": "^3.4.34",

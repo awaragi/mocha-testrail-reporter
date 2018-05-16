@@ -1,1 +1,1 @@
-module.exports = require("./dist/lib/mocha-testrail-reporter").MochaTestRailReporter
+module.exports = require('./dist/cypress-testrail-reporter').CypressTestRailReporter;
