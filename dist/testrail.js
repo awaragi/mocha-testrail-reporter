@@ -90,6 +90,7 @@ var TestRail = /** @class */ (function () {
             assignedto_id: this.options.assignedToId,
             include_all: true,
         }, function (body) {
+            console.log('');
             var runId = body.id;
             console.log("Results published to " + _this.base + "?/runs/view/" + runId);
             _this._post("add_results_for_cases/" + runId, {

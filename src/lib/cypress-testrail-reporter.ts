@@ -77,7 +77,7 @@ export class CypressTestRailReporter extends reporters.Spec {
   - Total: ${totalCases}
 
 For the full test run visit https://dashboard.cypress.io/#/projects/runs`;
-
+      console.log(this.results)
       new TestRail(reporterOptions).publish(name, description, this.results);
     });
   }

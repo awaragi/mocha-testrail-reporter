@@ -106,6 +106,7 @@ export class TestRail {
         include_all: true,
       },
       body => {
+        console.log('')
         const runId = body.id;
         console.log(`Results published to ${this.base}?/runs/view/${runId}`);
         this._post(
