@@ -1,107 +1,65 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var request = require("unirest");
+var axios_1 = require("axios");
+var chalk_1 = require("chalk");
 /**
  * TestRail basic API wrapper
  */
 var TestRail = /** @class */ (function () {
     function TestRail(options) {
         this.options = options;
-        // compute base url
-        this.base = "https://" + options.domain + "/index.php";
+        this.base = "https://" + options.domain + "/index.php?/api/v2";
     }
-    TestRail.prototype._post = function (api, body, callback, error) {
-        var req = request('POST', this.base)
-            .query("/api/v2/" + api)
-            .headers({
-            'content-type': 'application/json',
-        })
-            .type('json')
-            .send(body)
-            .auth(this.options.username, this.options.password)
-            .end(function (res) {
-            if (res.error) {
-                console.log('Error: %s', JSON.stringify(res.body));
-                if (error) {
-                    error(res.error);
-                }
-                else {
-                    throw new Error(res.error);
-                }
-            }
-            callback(res.body);
-        });
-    };
-    TestRail.prototype._get = function (api, callback, error) {
-        var req = request('GET', this.base)
-            .query("/api/v2/" + api)
-            .headers({
-            'content-type': 'application/json',
-        })
-            .type('json')
-            .auth(this.options.username, this.options.password)
-            .end(function (res) {
-            if (res.error) {
-                console.log('Error: %s', JSON.stringify(res.body));
-                if (error) {
-                    error(res.error);
-                }
-                else {
-                    throw new Error(res.error);
-                }
-            }
-            callback(res.body);
-        });
-    };
-    /**
-     * Fetchs test cases from projet/suite based on filtering criteria (optional)
-     * @param {{[p: string]: number[]}} filters
-     * @param {Function} callback
-     */
-    TestRail.prototype.fetchCases = function (filters, callback) {
-        var filter = '';
-        if (filters) {
-            for (var key in filters) {
-                if (filters.hasOwnProperty(key)) {
-                    filter += '&' + key + '=' + filters[key].join(',');
-                }
-            }
-        }
-        var req = this._get("get_cases/" + this.options.projectId + "&suite_id=" + this.options.suiteId + filter, function (body) {
-            if (callback) {
-                callback(body);
-            }
-        });
-    };
-    /**
-     * Publishes results of execution of an automated test run
-     * @param {string} name
-     * @param {string} description
-     * @param {TestRailResult[]} results
-     * @param {Function} callback
-     */
-    TestRail.prototype.publish = function (name, description, results, callback) {
+    TestRail.prototype.createRun = function (name, description) {
         var _this = this;
-        console.log("Publishing " + results.length + " test result(s) to " + this.base);
-        this._post("add_run/" + this.options.projectId, {
-            suite_id: this.options.suiteId,
-            name: name,
-            description: description,
-            assignedto_id: this.options.assignedToId,
-            include_all: true,
-        }, function (body) {
-            console.log('');
-            var runId = body.id;
-            console.log("Results published to " + _this.base + "?/runs/view/" + runId);
-            _this._post("add_results_for_cases/" + runId, {
-                results: results,
-            }, function (body) {
-                // execute callback if specified
-                if (callback) {
-                    callback();
-                }
-            });
-        });
+        axios_1.default({
+            method: 'post',
+            url: this.base + "/add_run/" + this.options.projectId,
+            headers: { 'Content-Type': 'application/json' },
+            auth: {
+                username: this.options.username,
+                password: this.options.password,
+            },
+            data: JSON.stringify({
+                suite_id: this.options.suiteId,
+                name: name,
+                description: description,
+                include_all: true,
+            }),
+        })
+            .then(function (response) {
+            _this.runId = response.data.id;
+        })
+            .catch(function (error) { return console.error(error); });
+    };
+    TestRail.prototype.deleteRun = function () {
+        axios_1.default({
+            method: 'post',
+            url: this.base + "/delete_run/" + this.runId,
+            headers: { 'Content-Type': 'application/json' },
+            auth: {
+                username: this.options.username,
+                password: this.options.password,
+            }
+        }).catch(function (error) { return console.error(error); });
+    };
+    TestRail.prototype.publishResults = function (results) {
+        var _this = this;
+        axios_1.default({
+            method: 'post',
+            url: this.base + "/add_results_for_cases/" + this.runId,
+            headers: { 'Content-Type': 'application/json' },
+            auth: {
+                username: this.options.username,
+                password: this.options.password,
+            },
+            data: JSON.stringify({ results: results }),
+        })
+            .then(function (response) {
+            console.log('\n', chalk_1.default.magenta.underline.bold('(TestRail Reporter)'));
+            console.log('\n', " - Results are published to " + chalk_1.default.magenta("https://" + _this.options.domain + "/index.php?/runs/view/" + _this.runId), '\n');
+        })
+            .catch(function (error) { return console.error(error); });
     };
     return TestRail;
 }());

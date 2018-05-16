@@ -1,4 +1,5 @@
-import request = require('unirest');
+import axios from 'axios';
+import chalk from 'chalk';
 import { TestRailOptions, TestRailResult } from './testrail.interface';
 
 /**
@@ -6,122 +7,67 @@ import { TestRailOptions, TestRailResult } from './testrail.interface';
  */
 export class TestRail {
   private base: String;
+  private runId: Number;
 
   constructor(private options: TestRailOptions) {
-
-    // compute base url
-    this.base = `https://${options.domain}/index.php`;
+    this.base = `https://${options.domain}/index.php?/api/v2`;
   }
 
-  private _post(api: String, body: any, callback: Function, error?: Function) {
-    var req = request('POST', this.base)
-      .query(`/api/v2/${api}`)
-      .headers({
-        'content-type': 'application/json',
-      })
-      .type('json')
-      .send(body)
-      .auth(this.options.username, this.options.password)
-      .end(res => {
-        if (res.error) {
-          console.log('Error: %s', JSON.stringify(res.body));
-          if (error) {
-            error(res.error);
-          } else {
-            throw new Error(res.error);
-          }
-        }
-        callback(res.body);
-      });
-  }
-
-  private _get(api: String, callback: Function, error?: Function) {
-    var req = request('GET', this.base)
-      .query(`/api/v2/${api}`)
-      .headers({
-        'content-type': 'application/json',
-      })
-      .type('json')
-      .auth(this.options.username, this.options.password)
-      .end(res => {
-        if (res.error) {
-          console.log('Error: %s', JSON.stringify(res.body));
-          if (error) {
-            error(res.error);
-          } else {
-            throw new Error(res.error);
-          }
-        }
-        callback(res.body);
-      });
-  }
-
-  /**
-   * Fetchs test cases from projet/suite based on filtering criteria (optional)
-   * @param {{[p: string]: number[]}} filters
-   * @param {Function} callback
-   */
-  public fetchCases(filters?: { [key: string]: number[] }, callback?: Function): void {
-    let filter = '';
-    if (filters) {
-      for (var key in filters) {
-        if (filters.hasOwnProperty(key)) {
-          filter += '&' + key + '=' + filters[key].join(',');
-        }
-      }
-    }
-
-    let req = this._get(
-      `get_cases/${this.options.projectId}&suite_id=${this.options.suiteId}${filter}`,
-      body => {
-        if (callback) {
-          callback(body);
-        }
-      }
-    );
-  }
-
-  /**
-   * Publishes results of execution of an automated test run
-   * @param {string} name
-   * @param {string} description
-   * @param {TestRailResult[]} results
-   * @param {Function} callback
-   */
-  public publish(
-    name: string,
-    description: string,
-    results: TestRailResult[],
-    callback?: Function
-  ): void {
-    console.log(`Publishing ${results.length} test result(s) to ${this.base}`);
-
-    this._post(
-      `add_run/${this.options.projectId}`,
-      {
-        suite_id: this.options.suiteId,
-        name: name,
-        description: description,
-        assignedto_id: this.options.assignedToId,
-        include_all: true,
+  public createRun(name: string, description: string) {
+    axios({
+      method: 'post',
+      url: `${this.base}/add_run/${this.options.projectId}`,
+      headers: { 'Content-Type': 'application/json' },
+      auth: {
+        username: this.options.username,
+        password: this.options.password,
       },
-      body => {
-        console.log('')
-        const runId = body.id;
-        console.log(`Results published to ${this.base}?/runs/view/${runId}`);
-        this._post(
-          `add_results_for_cases/${runId}`,
-          {
-            results: results,
-          },
-          body => {
-            // execute callback if specified
-            if (callback) {
-              callback();
-            }
-          }
-        );
+      data: JSON.stringify({
+        suite_id: this.options.suiteId,
+        name,
+        description,
+        include_all: true,
+      }),
+    })
+      .then(response => {
+        this.runId = response.data.id;
+      })
+      .catch(error => console.error(error));
+  }
+
+  public deleteRun() {
+    axios({
+      method: 'post',
+      url: `${this.base}/delete_run/${this.runId}`,
+      headers: { 'Content-Type': 'application/json' },
+      auth: {
+        username: this.options.username,
+        password: this.options.password,
       }
-    );
+    }).catch(error => console.error(error))
+  }
+
+  public publishResults(results: TestRailResult[]) {
+    axios({
+      method: 'post',
+      url: `${this.base}/add_results_for_cases/${this.runId}`,
+      headers: { 'Content-Type': 'application/json' },
+      auth: {
+        username: this.options.username,
+        password: this.options.password,
+      },
+      data: JSON.stringify({ results }),
+    })
+      .then(response => {
+        console.log('\n', chalk.magenta.underline.bold('(TestRail Reporter)'));
+        console.log(
+          '\n',
+          ` - Results are published to ${chalk.magenta(
+            `https://${this.options.domain}/index.php?/runs/view/${this.runId}`
+          )}`,
+          '\n'
+        );
+      })
+      .catch(error => console.error(error));
   }
 }

@@ -15,26 +15,26 @@ var moment = require("moment");
 var testrail_1 = require("./testrail");
 var shared_1 = require("./shared");
 var testrail_interface_1 = require("./testrail.interface");
+var chalk_1 = require("chalk");
 var CypressTestRailReporter = /** @class */ (function (_super) {
     __extends(CypressTestRailReporter, _super);
     function CypressTestRailReporter(runner, options) {
         var _this = _super.call(this, runner) || this;
         _this.results = [];
-        _this.passes = 0;
-        _this.fails = 0;
-        _this.durationInMs = 0;
         var reporterOptions = options.reporterOptions;
+        _this.testRail = new testrail_1.TestRail(reporterOptions);
         _this.validate(reporterOptions, 'domain');
         _this.validate(reporterOptions, 'username');
         _this.validate(reporterOptions, 'password');
         _this.validate(reporterOptions, 'projectId');
         _this.validate(reporterOptions, 'suiteId');
-        runner.on('hook end', function (hook) {
-            _this.durationInMs += hook.duration;
+        runner.on('start', function () {
+            var executionDateTime = moment().format('MMM Do YYYY, HH:mm (Z)');
+            var name = (reporterOptions.runName || 'Automated test run') + " " + executionDateTime;
+            var description = 'For the Cypress run visit https://dashboard.cypress.io/#/projects/runs';
+            _this.testRail.createRun(name, description);
         });
         runner.on('pass', function (test) {
-            _this.passes++;
-            _this.durationInMs += test.duration;
             var caseIds = shared_1.titleToCaseIds(test.title);
             if (caseIds.length > 0) {
                 var results = caseIds.map(function (caseId) {
@@ -49,8 +49,6 @@ var CypressTestRailReporter = /** @class */ (function (_super) {
             var _a;
         });
         runner.on('fail', function (test) {
-            _this.fails++;
-            _this.durationInMs += test.duration;
             var caseIds = shared_1.titleToCaseIds(test.title);
             if (caseIds.length > 0) {
                 var results = caseIds.map(function (caseId) {
@@ -66,17 +64,12 @@ var CypressTestRailReporter = /** @class */ (function (_super) {
         });
         runner.on('end', function () {
             if (_this.results.length == 0) {
-                console.warn('No testcases were matched. Ensure that your tests are declared correctly and matches TCxxx');
+                console.log('\n', chalk_1.default.magenta.underline.bold('(TestRail Reporter)'));
+                console.warn('\n', 'No testcases were matched. Ensure that your tests are declared correctly and matches Cxxx', '\n');
+                _this.testRail.deleteRun();
                 return;
             }
-            var executionDateTime = moment().format('MMM Do YYYY, HH:mm (Z)');
-            var totalCases = _this.passes + _this.fails;
-            var momentDuration = moment.duration(_this.durationInMs);
-            var totalDuration = "" + (momentDuration.hours() ? momentDuration.hours() + ' hours ' : '') + momentDuration.minutes() + " min " + momentDuration.seconds() + " sec";
-            var name = (reporterOptions.runName || 'Automated test run') + " " + executionDateTime;
-            var description = "# Execution summary: #\n  - Duration: " + totalDuration + "\n  - Passed: " + _this.passes + "\n  - Failed: " + _this.fails + "\n  - Total: " + totalCases + "\n\nFor the full test run visit https://dashboard.cypress.io/#/projects/runs";
-            console.log(_this.results);
-            new testrail_1.TestRail(reporterOptions).publish(name, description, _this.results);
+            _this.testRail.publishResults(_this.results);
         });
         return _this;
     }

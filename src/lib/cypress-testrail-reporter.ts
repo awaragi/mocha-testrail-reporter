@@ -3,30 +3,31 @@ import * as moment from 'moment';
 import { TestRail } from './testrail';
 import { titleToCaseIds } from './shared';
 import { Status, TestRailResult } from './testrail.interface';
+import chalk from 'chalk';
 
 export class CypressTestRailReporter extends reporters.Spec {
   private results: TestRailResult[] = [];
-  private passes: number = 0;
-  private fails: number = 0;
-  private durationInMs: number = 0;
+  private testRail: TestRail;
 
   constructor(runner: any, options: any) {
     super(runner);
 
     let reporterOptions = options.reporterOptions;
+    this.testRail = new TestRail(reporterOptions);
     this.validate(reporterOptions, 'domain');
     this.validate(reporterOptions, 'username');
     this.validate(reporterOptions, 'password');
     this.validate(reporterOptions, 'projectId');
     this.validate(reporterOptions, 'suiteId');
 
-    runner.on('hook end', hook => {
-      this.durationInMs += hook.duration;
+    runner.on('start', () => {
+      const executionDateTime = moment().format('MMM Do YYYY, HH:mm (Z)');
+      const name = `${reporterOptions.runName || 'Automated test run'} ${executionDateTime}`;
+      const description = 'For the Cypress run visit https://dashboard.cypress.io/#/projects/runs';
+      this.testRail.createRun(name, description);
     });
 
     runner.on('pass', test => {
-      this.passes++;
-      this.durationInMs += test.duration;
       const caseIds = titleToCaseIds(test.title);
       if (caseIds.length > 0) {
         const results = caseIds.map(caseId => {
@@ -41,8 +42,6 @@ export class CypressTestRailReporter extends reporters.Spec {
     });
 
     runner.on('fail', test => {
-      this.fails++;
-      this.durationInMs += test.duration;
       const caseIds = titleToCaseIds(test.title);
       if (caseIds.length > 0) {
         const results = caseIds.map(caseId => {
@@ -58,27 +57,18 @@ export class CypressTestRailReporter extends reporters.Spec {
 
     runner.on('end', () => {
       if (this.results.length == 0) {
+        console.log('\n', chalk.magenta.underline.bold('(TestRail Reporter)'));
         console.warn(
-          'No testcases were matched. Ensure that your tests are declared correctly and matches TCxxx'
+          '\n',
+          'No testcases were matched. Ensure that your tests are declared correctly and matches Cxxx',
+          '\n'
         );
+        this.testRail.deleteRun();
+
         return;
       }
-      const executionDateTime = moment().format('MMM Do YYYY, HH:mm (Z)');
-      const totalCases = this.passes + this.fails;
-      const momentDuration = moment.duration(this.durationInMs);
-      const totalDuration = `${
-        momentDuration.hours() ? momentDuration.hours() + ' hours ' : ''
-      }${momentDuration.minutes()} min ${momentDuration.seconds()} sec`;
-      const name = `${reporterOptions.runName || 'Automated test run'} ${executionDateTime}`;
-      const description = `# Execution summary: #
-  - Duration: ${totalDuration}
-  - Passed: ${this.passes}
-  - Failed: ${this.fails}
-  - Total: ${totalCases}
 
-For the full test run visit https://dashboard.cypress.io/#/projects/runs`;
-      console.log(this.results)
-      new TestRail(reporterOptions).publish(name, description, this.results);
+      this.testRail.publishResults(this.results);
     });
   }
 
