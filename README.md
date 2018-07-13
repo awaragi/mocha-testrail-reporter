@@ -52,6 +52,8 @@ Only passed or failed tests will be published. Skipped or pending tests will not
 
 **assignedToId**: *number* (optional) user id which will be assigned failed tests
 
+**reportName**: *string* (optional) custom report title
+
 ## References
 - http://mochajs.org/#mochaopts
 - https://github.com/mochajs/mocha/wiki/Third-party-reporters
