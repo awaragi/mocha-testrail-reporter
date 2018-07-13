@@ -7,24 +7,24 @@ Pushes test results into Testrail system.
 ## Installation
 
 ```shell
-$ npm install mocha-testrail-reporter --save-dev
+$ npm install mocha-testrail-reporter-custom --save-dev
 ```
 
 ## Usage
 Ensure that your testrail installation API is enabled and generate your API keys. See http://docs.gurock.com/
 
-Run mocha with `mocha-testrail-reporter`:
+Run mocha with `mocha-testrail-reporter-custom`:
 
 ```shell
-$ mocha test --reporter mocha-testrail-reporter --reporter-options domain=instance.testrail.net,username=test@example.com,password=12345678,projectId=1,suiteId=1
+$ mocha test --reporter mocha-testrail-reporter-custom --reporter-options reportName=<Custom>,domain=instance.testrail.net,username=test@example.com,password=12345678,projectId=1,suiteId=1
 ```
 
 or use a mocha.options file
 ```shell
 mocha --opts mocha-testrail.opts build/test
 --recursive
---reporter mocha-testrail-reporter
---reporter-options domain=instance.testrail.net,username=test@example.com,password=12345678,projectId=1,suiteId=1
+--reporter mocha-testrail-reporter-custom
+--reporter-options reportName=<Custom>,domain=instance.testrail.net,username=test@example.com,password=12345678,projectId=1,suiteId=1
 --no-exit
 ```
 

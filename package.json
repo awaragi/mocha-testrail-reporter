@@ -1,6 +1,6 @@
 {
-  "name": "mocha-testrail-reporter",
-  "version": "1.0.12",
+  "name": "mocha-testrail-reporter-custom",
+  "version": "1.0.14",
   "description": "A Testrail reporter for mocha including TestRail API basic library",
   "main": "index.js",
   "private": false,
@@ -9,18 +9,15 @@
     "testrail",
     "reporter"
   ],
-  "author": {
-    "name": "Pierre Awaragi",
-    "email": "pierre@awaragi.com"
-  },
+  "author": {},
   "license": "MIT",
   "readmeFilename": "README.md",
   "repository": {
     "type": "git",
-    "url": "https://github.com/awaragi/mocha-testrail-reporter.git"
+    "url": "https://github.com/sungasu/mocha-testrail-reporter-custom.git"
   },
   "bugs": {
-    "url": "https://github.com/awaragi/mocha-testrail-reporter/issues"
+    "url": "https://github.com/sungasu/mocha-testrail-reporter-custom/issues"
   },
   "scripts": {
     "tsc": "tsc",
