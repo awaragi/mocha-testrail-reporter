@@ -85,7 +85,7 @@ ${test.err}`
             }
             let executionDateTime = new Date().toISOString();
             let total = this.passes + this.fails + this.pending;
-            let name = `Automated test run ${executionDateTime}`;
+            let name = process.env.NODE_ENV.toUpperCase() + ` Automated test run ${executionDateTime}`;
             let description = `Automated test run executed on ${executionDateTime}
 Execution summary:
 Passes: ${this.passes}
