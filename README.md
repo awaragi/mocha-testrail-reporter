@@ -54,7 +54,7 @@ it("Can authenticate a valid userC123", ...
 
 **runName**: _string_ (optional) name of the Testrail run.
 
-**includeAllInTestRun**: _bool_ (default is true) will return all test cases in test run. set to false to return test runs based on filter or section/group.
+**includeAllInTestRun**: _bool_ (optional: default is true) will return all test cases in test run. set to false to return test runs based on filter or section/group.
 
 **groupId**: _string_ (optional: needs "includeAllInTestRun": false ) The ID of the section/group
 
