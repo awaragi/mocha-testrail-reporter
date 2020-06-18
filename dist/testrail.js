@@ -6,9 +6,31 @@ var TestRail = /** @class */ (function () {
     function TestRail(options) {
         this.options = options;
         this.base = "https://" + options.domain + "/index.php?/api/v2";
-    }
-    TestRail.prototype.createRun = function (name, description) {
+    };
+    TestRail.prototype.getCases = async function(){
+        var casesArray = await axios({
+            method:'get',
+            url:this.base + "/get_cases/"+this.options.projectId+"&suite_id="+this.options.suiteId+"&section_id="+this.options.groupId+"&filter="+this.options.filter, 
+            headers: { 'Content-Type': 'application/json' }, 
+            auth: {
+                username: this.options.username,
+                password: this.options.password
+            } 
+          }  
+        ).then(function (response) {   
+            return response.data.map(item =>item.id);
+        })
+            .catch(function (error) { return console.error(error); });
+            return casesArray;
+    };
+    TestRail.prototype.createRun = async function (name, description) {
         var _this = this;
+        _this.includeALL = true;
+        _this.caseNumbersArray = [];
+         if(this.options.includeAllInTestRun == false){
+            _this.caseNumbersArray =  await _this.getCases();
+            _this.includeALL = false;
+         }   
         axios({
             method: 'post',
             url: this.base + "/add_run/" + this.options.projectId,
@@ -21,7 +43,8 @@ var TestRail = /** @class */ (function () {
                 suite_id: this.options.suiteId,
                 name: name,
                 description: description,
-                include_all: true,
+                include_all: _this.includeALL,
+                case_ids: _this.caseNumbersArray
             }),
         })
             .then(function (response) {
