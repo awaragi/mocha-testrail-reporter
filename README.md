@@ -58,7 +58,7 @@ it("Can authenticate a valid userC123", ...
 
 **groupId**: _string_ (optional: needs "includeAllInTestRun": false ) The ID of the section/group
 
-**groupId**: _string_ (optional: needs "includeAllInTestRun": false) Only return cases with matching filter string in the case title
+**filter**: _string_ (optional: needs "includeAllInTestRun": false) Only return cases with matching filter string in the case title
 
 ## TestRail Settings
 
