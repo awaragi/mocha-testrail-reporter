@@ -67,4 +67,28 @@ export class TestRail {
       })
       .catch(error => console.error(error));
   }
+
+  public closeRun(results: TestRailResult[]) {
+    axios({
+      method: 'post',
+      url: `${this.base}/close_run/${this.runId}`,
+      headers: { 'Content-Type': 'application/json' },
+      auth: {
+        username: this.options.username,
+        password: this.options.password,
+      },
+      data: JSON.stringify({ results }),
+    })
+      .then(response => {
+        console.log('\n', chalk.green.underline.bold('(TestRail Reporter)'));
+        console.log(
+          '\n',
+          ` - Test run marked as closed ${chalk.green(
+            `https://${this.options.domain}/index.php?/runs/view/${this.runId}`
+          )}`,
+          '\n'
+        );
+      })
+      .catch(error => console.error(error));
+  }
 }
