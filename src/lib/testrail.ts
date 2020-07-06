@@ -5,8 +5,8 @@ import { TestRailOptions, TestRailResult } from './testrail.interface';
 export class TestRail {
   private base: String;
   private runId: Number;
-  private includeALL: Boolean;
-  private caseNumbersArray: Number[];
+  private includeALL: Boolean = true;
+  private caseNumbersArray: Number[] = [];
 
   constructor(private options: TestRailOptions) {
     this.base = `https://${options.domain}/index.php?/api/v2`;
@@ -27,12 +27,9 @@ export class TestRail {
   }
 
   public async createRun (name: string, description: string) {
-    var slef = this;
-    slef.includeALL = true;
-    slef.caseNumbersArray = [];
-    if(this.options.includeAllInTestRun === false){
-      slef.caseNumbersArray =  await slef.getCases();
-      slef.includeALL = false;
+    if (this.options.includeAllInTestRun === false){
+      this.includeALL = false;
+      this.caseNumbersArray =  await this.getCases();
     }  
     axios({
       method: 'post',
@@ -46,8 +43,8 @@ export class TestRail {
         suite_id: this.options.suiteId,
         name,
         description,
-        include_all: slef.includeALL,
-        case_ids: slef.caseNumbersArray
+        include_all: this.includeALL,
+        case_ids: this.caseNumbersArray
       }),
     })
       .then(response => {
