@@ -6,7 +6,7 @@ export class TestRail {
   private base: String;
   private runId: Number;
   private includeAll: Boolean = true;
-  private caseNumbersArray: Number[] = [];
+  private caseIds: Number[] = [];
 
   constructor(private options: TestRailOptions) {
     this.base = `https://${options.domain}/index.php?/api/v2`;
@@ -29,7 +29,7 @@ export class TestRail {
   public async createRun (name: string, description: string) {
     if (this.options.includeAllInTestRun === false){
       this.includeAll = false;
-      this.caseNumbersArray =  await this.getCases();
+      this.caseIds =  await this.getCases();
     }  
     axios({
       method: 'post',
@@ -44,7 +44,7 @@ export class TestRail {
         name,
         description,
         include_all: this.includeAll,
-        case_ids: this.caseNumbersArray
+        case_ids: this.caseIds
       }),
     })
       .then(response => {
