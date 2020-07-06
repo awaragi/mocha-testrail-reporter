@@ -45,7 +45,7 @@ export class TestRail {
   }
 
   public publishResults(results: TestRailResult[]) {
-    axios({
+     return axios({
       method: 'post',
       url: `${this.base}/add_results_for_cases/${this.runId}`,
       headers: { 'Content-Type': 'application/json' },
@@ -61,10 +61,23 @@ export class TestRail {
           '\n',
           ` - Results are published to ${chalk.magenta(
             `https://${this.options.domain}/index.php?/runs/view/${this.runId}`
-          )}`,
+          )} and test run marked as completed.`,
           '\n'
         );
       })
+      .catch(error => console.error(error));
+  }
+
+  public closeRun() {
+    axios({
+      method: 'post',
+      url: `${this.base}/close_run/${this.runId}`,
+      headers: { 'Content-Type': 'application/json' },
+      auth: {
+        username: this.options.username,
+        password: this.options.password,
+      },
+    })
       .catch(error => console.error(error));
   }
 }
