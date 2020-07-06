@@ -1,6 +1,6 @@
 {
   "name": "cypress-testrail-reporter",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "A Testrail reporter for cypress including TestRail API basic library",
   "main": "index.js",
   "private": false,
