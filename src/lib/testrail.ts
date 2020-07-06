@@ -5,7 +5,7 @@ import { TestRailOptions, TestRailResult } from './testrail.interface';
 export class TestRail {
   private base: String;
   private runId: Number;
-  private includeALL: Boolean = true;
+  private includeAll: Boolean = true;
   private caseNumbersArray: Number[] = [];
 
   constructor(private options: TestRailOptions) {
@@ -28,7 +28,7 @@ export class TestRail {
 
   public async createRun (name: string, description: string) {
     if (this.options.includeAllInTestRun === false){
-      this.includeALL = false;
+      this.includeAll = false;
       this.caseNumbersArray =  await this.getCases();
     }  
     axios({
@@ -43,7 +43,7 @@ export class TestRail {
         suite_id: this.options.suiteId,
         name,
         description,
-        include_all: this.includeALL,
+        include_all: this.includeAll,
         case_ids: this.caseNumbersArray
       }),
     })
