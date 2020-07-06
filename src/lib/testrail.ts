@@ -5,12 +5,35 @@ import { TestRailOptions, TestRailResult } from './testrail.interface';
 export class TestRail {
   private base: String;
   private runId: Number;
+  private includeALL: Boolean;
+  private caseNumbersArray: Number[];
 
   constructor(private options: TestRailOptions) {
     this.base = `https://${options.domain}/index.php?/api/v2`;
   }
 
-  public createRun(name: string, description: string) {
+  public getCases () {
+    return axios({
+      method:'get',
+      url: `${this.base}/get_cases/${this.options.projectId}&suite_id=${this.options.suiteId}&section_id=${this.options.groupId}&filter=${this.options.filter}`,
+      headers: { 'Content-Type': 'application/json' }, 
+      auth: {
+          username: this.options.username,
+          password: this.options.password
+      } 
+    })
+      .then(response => response.data.map(item =>item.id))
+      .catch(error => console.error(error));
+  }
+
+  public async createRun (name: string, description: string) {
+    var slef = this;
+    slef.includeALL = true;
+    slef.caseNumbersArray = [];
+    if(this.options.includeAllInTestRun === false){
+      slef.caseNumbersArray =  await slef.getCases();
+      slef.includeALL = false;
+    }  
     axios({
       method: 'post',
       url: `${this.base}/add_run/${this.options.projectId}`,
@@ -23,7 +46,8 @@ export class TestRail {
         suite_id: this.options.suiteId,
         name,
         description,
-        include_all: true,
+        include_all: slef.includeALL,
+        case_ids: slef.caseNumbersArray
       }),
     })
       .then(response => {
