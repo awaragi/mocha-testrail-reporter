@@ -1,6 +1,6 @@
 {
   "name": "mocha-testrail-reporter-custom",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "A Testrail reporter for mocha including TestRail API basic library",
   "main": "index.js",
   "private": false,
