@@ -92,10 +92,7 @@ Execution summary:
 Passes: ${this.passes}
 Fails: ${this.fails}
 Pending: ${this.pending}
-Total: ${total}
-
-Execution details:
-${this.out.join('\n')}                     
+Total: ${total}                 
 `;
             new TestRail(reporterOptions).publish(name, description, this.results);
         });
