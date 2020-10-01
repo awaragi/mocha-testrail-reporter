@@ -28,7 +28,7 @@
     "build": "npm run clean && npm run tsc"
   },
   "dependencies": {
-    "axios": "^0.18.1",
+    "axios": "^0.20.0",
     "btoa": "^1.1.2",
     "chalk": "^2.4.1",
     "mocha": "^2.2.5",
