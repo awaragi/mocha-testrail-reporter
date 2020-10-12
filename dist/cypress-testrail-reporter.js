@@ -42,6 +42,7 @@ var CypressTestRailReporter = /** @class */ (function (_super) {
                         case_id: caseId,
                         status_id: testrail_interface_1.Status.Passed,
                         comment: "Execution time: " + test.duration + "ms",
+                        elapsed: test.duration / 1000 + "s"
                     };
                 });
                 (_a = _this.results).push.apply(_a, results);

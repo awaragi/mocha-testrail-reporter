@@ -35,6 +35,7 @@ export class CypressTestRailReporter extends reporters.Spec {
             case_id: caseId,
             status_id: Status.Passed,
             comment: `Execution time: ${test.duration}ms`,
+            elapsed: `${test.duration/1000}s`
           };
         });
         this.results.push(...results);
