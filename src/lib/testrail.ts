@@ -9,7 +9,7 @@ export class TestRail {
   private caseIds: Number[] = [];
 
   constructor(private options: TestRailOptions) {
-    this.base = `https://${options.domain}/index.php?/api/v2`;
+    this.base = `${options.host}/index.php?/api/v2`;
   }
 
   public getCases () {
@@ -81,7 +81,7 @@ export class TestRail {
         console.log(
           '\n',
           ` - Results are published to ${chalk.magenta(
-            `https://${this.options.domain}/index.php?/runs/view/${this.runId}`
+            `${this.options.host}/index.php?/runs/view/${this.runId}`
           )}`,
           '\n'
         );
