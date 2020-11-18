@@ -9,13 +9,20 @@ export class TestRail {
   private caseIds: Number[] = [];
 
   constructor(private options: TestRailOptions) {
-    this.base = `https://${options.domain}/index.php?/api/v2`;
+    this.base = `${options.host}/index.php?/api/v2`;
   }
 
   public getCases () {
+    let url = `${this.base}/get_cases/${this.options.projectId}&suite_id=${this.options.suiteId}`
+    if (this.options.groupId) {
+      url += `&section_id=${this.options.groupId}`
+    }
+    if (this.options.filter) {
+      url += `&filter=${this.options.filter}`
+    }
     return axios({
       method:'get',
-      url: `${this.base}/get_cases/${this.options.projectId}&suite_id=${this.options.suiteId}&section_id=${this.options.groupId}&filter=${this.options.filter}`,
+      url: url,
       headers: { 'Content-Type': 'application/json' }, 
       auth: {
           username: this.options.username,
@@ -81,7 +88,7 @@ export class TestRail {
         console.log(
           '\n',
           ` - Results are published to ${chalk.magenta(
-            `https://${this.options.domain}/index.php?/runs/view/${this.runId}`
+            `${this.options.host}/index.php?/runs/view/${this.runId}`
           )}`,
           '\n'
         );

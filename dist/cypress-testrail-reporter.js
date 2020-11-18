@@ -26,7 +26,7 @@ var CypressTestRailReporter = /** @class */ (function (_super) {
             reporterOptions.password = process.env.CYPRESS_TESTRAIL_REPORTER_PASSWORD;
         }
         _this.testRail = new testrail_1.TestRail(reporterOptions);
-        _this.validate(reporterOptions, 'domain');
+        _this.validate(reporterOptions, 'host');
         _this.validate(reporterOptions, 'username');
         _this.validate(reporterOptions, 'password');
         _this.validate(reporterOptions, 'projectId');

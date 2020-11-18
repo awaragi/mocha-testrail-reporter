@@ -20,7 +20,7 @@ Add reporter to your `cypress.json`:
 ...
 "reporter": "cypress-testrail-reporter",
 "reporterOptions": {
-  "domain": "yourdomain.testrail.com",
+  "host": "https://yourdomain.testrail.com",
   "username": "username",
   "password": "password",
   "projectId": 1,
@@ -42,7 +42,7 @@ it("Can authenticate a valid userC123", ...
 
 ## Reporter Options
 
-**domain**: _string_ domain name of your TestRail instance (e.g. for a hosted instance _instance.testrail.com_).
+**host**: _string_ host of your TestRail instance (e.g. for a hosted instance _https://instance.testrail.com_).
 
 **username**: _string_ email of the user under which the test run will be created.
 
