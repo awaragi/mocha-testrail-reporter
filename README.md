@@ -46,7 +46,7 @@ it("Can authenticate a valid userC123", ...
 
 **username**: _string_ email of the user under which the test run will be created.
 
-**password**: _string_ password or the API key for the aforementioned user.
+**password**: _string_ password or the API key for the aforementioned user. When you set `CYPRESS_TESTRAIL_REPORTER_PASSWORD` in runtime environment variables, this option would be overwritten with it.
 
 **projectId**: _number_ project with which the tests are associated.
 
