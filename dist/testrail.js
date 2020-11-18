@@ -42,12 +42,19 @@ var TestRail = /** @class */ (function () {
         this.options = options;
         this.includeAll = true;
         this.caseIds = [];
-        this.base = "https://" + options.domain + "/index.php?/api/v2";
+        this.base = options.host + "/index.php?/api/v2";
     }
     TestRail.prototype.getCases = function () {
+        var url = this.base + "/get_cases/" + this.options.projectId + "&suite_id=" + this.options.suiteId;
+        if (this.options.groupId) {
+            url += "&section_id=" + this.options.groupId;
+        }
+        if (this.options.filter) {
+            url += "&filter=" + this.options.filter;
+        }
         return axios({
             method: 'get',
-            url: this.base + "/get_cases/" + this.options.projectId + "&suite_id=" + this.options.suiteId + "&section_id=" + this.options.groupId + "&filter=" + this.options.filter,
+            url: url,
             headers: { 'Content-Type': 'application/json' },
             auth: {
                 username: this.options.username,
@@ -122,7 +129,7 @@ var TestRail = /** @class */ (function () {
         })
             .then(function (response) {
             console.log('\n', chalk.magenta.underline.bold('(TestRail Reporter)'));
-            console.log('\n', " - Results are published to " + chalk.magenta("https://" + _this.options.domain + "/index.php?/runs/view/" + _this.runId), '\n');
+            console.log('\n', " - Results are published to " + chalk.magenta(_this.options.host + "/index.php?/runs/view/" + _this.runId), '\n');
         })
             .catch(function (error) { return console.error(error); });
     };

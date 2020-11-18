@@ -1,5 +1,5 @@
 export interface TestRailOptions {
-  domain: string;
+  host: string;
   username: string;
   password: string;
   projectId: number;
