@@ -92,7 +92,8 @@ export class TestRail {
             "name": name,
             "description": description,
             "assignedto_id": this.options.assignedToId,
-            "include_all": true
+            "include_all": false,
+            "case_ids":  results.map(testCase => testCase.case_id) // Only the test cases that hae results we want to include in the run
         }, (body) => {
             const runId = body.id
             console.log(`Results published to ${this.base}?/runs/view/${runId}`)
