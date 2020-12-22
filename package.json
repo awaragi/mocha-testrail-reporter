@@ -23,7 +23,8 @@
     "tsc": "tsc",
     "clean": "rimraf dist",
     "test": "mocha dist/test",
-    "build": "npm run clean && npm run tsc"
+    "build": "npm run clean && npm run tsc",
+    "release": "np"
   },
   "dependencies": {
     "btoa": "^1.1.2",
@@ -37,7 +38,13 @@
     "@types/mocha": "^2.2.36",
     "@types/node": "^6.0.58",
     "chai": "^3.5.0",
+    "np": "^7.0.0",
     "rimraf": "^2.5.4",
     "typescript": "^2.1.4"
+  },
+  "np": {
+    "yarn": false,
+    "contents": "dist",
+    "yolo": true
   }
 }

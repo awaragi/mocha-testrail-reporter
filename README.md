@@ -54,6 +54,16 @@ Only passed or failed tests will be published. Skipped or pending tests will not
 
 **reportName**: *string* (optional) custom report title
 
+## Releasing to npm
+After you have made your changes to the .ts files and commit them to the repo.
+You can run the following to build and release to npm. It will show an interaction area where you can determine the 
+release type (minor/major) and so on. 
+
+```shell
+$ npm run release
+```
+
+
 ## References
 - http://mochajs.org/#mochaopts
 - https://github.com/mochajs/mocha/wiki/Third-party-reporters
