@@ -1,7 +1,7 @@
 import {reporters} from 'mocha';
 import {TestRail} from "./testrail";
 import {titleToCaseIds} from "./shared";
-import {Status, TestRailResult} from "./testrail.interface";
+import {Status, TestRailResult, TestRailOptions} from "./testrail.interface";
 
 
 export class MochaTestRailReporter extends reporters.Spec {
