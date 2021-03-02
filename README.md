@@ -27,6 +27,38 @@ Add reporter to your `cypress.json`:
   "suiteId": 1,
 }
 ```
+This reporter can handle multiple suite project in TestRail. In order to use it, don't define **suiteId** under **cypress.json** file and instead you should pass **testRailSuiteId** variable when you define all other CLI agruments for cypress execution(through command line). If you are using CI integration solution (e.g. GitLab) **testRailSuiteId** can be set before every pipeline job or predefined for each spec (test) file for which suiteId belongs to.
+
+**gitlab-ci.yml** file (Here you can pass **suiteId** as a variable):
+
+```Javascript
+
+e2e_test1:
+  script: 
+    - e2e-setup.sh
+  variables:
+    CYPRESS_SPEC: "cypress/integration/dashboard/*"
+    TESTRAIL_SUITEID: 1
+
+e2e_test2:
+  script: 
+    - e2e-setup.sh
+  variables:
+    CYPRESS_SPEC: "cypress/integration/login/*"
+    TESTRAIL_SUITEID: 2
+```
+
+and use it later during cypress run:
+
+**e2e-setup.sh** file
+
+```Javascript
+
+CYPRESS_OPTIONS="baseUrl=${url},trashAssetsBeforeRuns=false,video=${video},screenshotOnRunFailure=${screenshotOnRunFailure}"
+CYPRESS_ENV="testRailSuiteId=${TESTRAIL_SUITEID}"
+
+npx cypress run --headed --browser chrome --config "${CYPRESS_OPTIONS}" --env="${CYPRESS_ENV}" --spec "${CYPRESS_SPEC}"
+```
 
 Your Cypress tests should include the ID of your TestRail test case. Make sure your test case IDs are distinct from your test titles:
 
@@ -50,9 +82,11 @@ it("Can authenticate a valid userC123", ...
 
 **projectId**: _number_ project with which the tests are associated.
 
-**suiteId**: _number_ suite with which the tests are associated.
+**suiteId**: _number_ suite with which the tests are associated. Optional under cypress.json file in case that you define suiteId under gitlab-ci.yml file or pass this value in runtime environment varables.
 
 **runName**: _string_ (optional) name of the Testrail run.
+
+**allowFailedScreenshotUpload**: _bool_ (optional: default is false) will upload failed screenshot to corresponding test result comment for easier debugging of failure
 
 **includeAllInTestRun**: _bool_ (optional: default is true) will return all test cases in test run. set to false to return test runs based on filter or section/group.
 
