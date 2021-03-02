@@ -36,13 +36,17 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var axios = require('axios');
-var chalk = require('chalk');
+var find = require('find');
+var request = require('request');
+var fs = require('fs');
 var TestRail = /** @class */ (function () {
     function TestRail(options) {
         this.options = options;
         this.includeAll = true;
         this.caseIds = [];
         this.base = options.host + "/index.php?/api/v2";
+        this.runId;
+        this.counter = 1;
     }
     TestRail.prototype.getCases = function () {
         var url = this.base + "/get_cases/" + this.options.projectId + "&suite_id=" + this.options.suiteId;
@@ -64,7 +68,7 @@ var TestRail = /** @class */ (function () {
             .then(function (response) { return response.data.map(function (item) { return item.id; }); })
             .catch(function (error) { return console.error(error); });
     };
-    TestRail.prototype.createRun = function (name, description) {
+    TestRail.prototype.createRun = function (name, description, suiteId) {
         return __awaiter(this, void 0, void 0, function () {
             var _this = this;
             var _a;
@@ -88,7 +92,7 @@ var TestRail = /** @class */ (function () {
                                 password: this.options.password,
                             },
                             data: JSON.stringify({
-                                suite_id: this.options.suiteId,
+                                suite_id: suiteId,
                                 name: name,
                                 description: description,
                                 include_all: this.includeAll,
@@ -97,6 +101,8 @@ var TestRail = /** @class */ (function () {
                         })
                             .then(function (response) {
                             _this.runId = response.data.id;
+                            // cache the TestRail Run ID
+                            TestRailCache.store('runId', _this.runId);
                         })
                             .catch(function (error) { return console.error(error); });
                         return [2 /*return*/];
@@ -116,7 +122,6 @@ var TestRail = /** @class */ (function () {
         }).catch(function (error) { return console.error(error); });
     };
     TestRail.prototype.publishResults = function (results) {
-        var _this = this;
         return axios({
             method: 'post',
             url: this.base + "/add_results_for_cases/" + this.runId,
@@ -128,11 +133,65 @@ var TestRail = /** @class */ (function () {
             data: JSON.stringify({ results: results }),
         })
             .then(function (response) {
-            console.log('\n', chalk.magenta.underline.bold('(TestRail Reporter)'));
-            console.log('\n', " - Results are published to " + chalk.magenta(_this.options.host + "/index.php?/runs/view/" + _this.runId), '\n');
+            return response.data;
         })
-            .catch(function (error) { return console.error(error); });
+            .catch(function (error) {
+            return console.error(error);
+        });
     };
+    // This is an API call to the TestRail with proper attachment
+    TestRail.prototype.loadAttachment = function (resultId, attachment) {
+        var options = {
+            method: "POST",
+            url: this.base + "/add_attachment_to_result/" + resultId,
+            headers: {
+                "Content-Type": "multipart/form-data"
+            },
+            auth: {
+                username: this.options.username,
+                password: this.options.password,
+            },
+            formData: {
+                "attachment": fs.createReadStream("./" + attachment)
+            }
+        };
+        request(options, function (err) {
+            if (err)
+                console.log(err);
+        });
+    };
+    // This function will attach failed screenshot on each test result(comment) if founds it
+    TestRail.prototype.addAttachmentToResult = function (results, loadedResultId) {
+        var _this = this;
+        var caseId = results[0].case_id;
+        try {
+            find.file('./cypress/screenshots/', function (files) {
+                files.filter(function (file) { return file.includes("C" + caseId); }).forEach(function (screenshot) {
+                    if (_this.counter === 1) {
+                        if (screenshot.includes('(failed).png') === true) {
+                            _this.loadAttachment(loadedResultId, screenshot);
+                            _this.counter++;
+                        }
+                    }
+                    else if (_this.counter === 2) {
+                        if (screenshot.includes('(attempt 2).png') === true) {
+                            _this.loadAttachment(loadedResultId, screenshot);
+                            _this.counter++;
+                        }
+                    }
+                    else {
+                        if (screenshot.includes('(attempt 3).png') === true) {
+                            _this.loadAttachment(loadedResultId, screenshot);
+                        }
+                    }
+                });
+            });
+        }
+        catch (err) {
+            console.log('Error on adding screenshots. There is no screenshots or something else went wrong.', err);
+        }
+    };
+    ;
     TestRail.prototype.closeRun = function () {
         axios({
             method: 'post',
@@ -143,7 +202,9 @@ var TestRail = /** @class */ (function () {
                 password: this.options.password,
             },
         })
-            .then(function () { return console.log('- Test run closed successfully'); })
+            .then(function () {
+            TestRailLogger.log('Test run closed successfully');
+        })
             .catch(function (error) { return console.error(error); });
     };
     return TestRail;
