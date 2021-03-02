@@ -30,7 +30,7 @@ export class CypressTestRailReporter extends reporters.Spec {
     this.testRailValidation.validateReporterOptions(reporterOptions);
     const cliArguments = this.testRailValidation.validateCLIArguments();
 
-    if (cliArguments.length == 0) {
+    if (cliArguments.length == 0 && reporterOptions.suiteId) {
       // skip reporter and don't start runner
     } else {
       runner.on('start', () => {
@@ -40,7 +40,11 @@ export class CypressTestRailReporter extends reporters.Spec {
         * which case that will be used and no new one created.
         */
         if (!TestRailCache.retrieve('runId')) {
-            const suiteId = this.testRailValidation.validateCLIArguments();
+            if (reporterOptions.suiteId) {
+              var suiteId = reporterOptions.suiteId
+            } else {
+              var suiteId = cliArguments
+            }
             const executionDateTime = moment().format('MMM Do YYYY, HH:mm (Z)');
             const name = `${reporterOptions.runName || 'Automated test run'} ${executionDateTime}`;
             const description = 'For the Cypress run visit https://dashboard.cypress.io/#/projects/runs';
