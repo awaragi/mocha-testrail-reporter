@@ -16,26 +16,38 @@ var testrail_1 = require("./testrail");
 var shared_1 = require("./shared");
 var testrail_interface_1 = require("./testrail.interface");
 var testrail_validation_1 = require("./testrail.validation");
+var TestRailCache = require('./testrail.cache');
+var TestRailLogger = require('./testrail.logger');
 var chalk = require('chalk');
+var runCounter = 1;
 var CypressTestRailReporter = /** @class */ (function (_super) {
     __extends(CypressTestRailReporter, _super);
     function CypressTestRailReporter(runner, options) {
         var _this = _super.call(this, runner) || this;
         _this.results = [];
-        var runCounter = 1;
-        var reporterOptions = options.reporterOptions;
+        _this.reporterOptions = options.reporterOptions;
         if (process.env.CYPRESS_TESTRAIL_REPORTER_PASSWORD) {
-            reporterOptions.password = process.env.CYPRESS_TESTRAIL_REPORTER_PASSWORD;
+            _this.reporterOptions.password = process.env.CYPRESS_TESTRAIL_REPORTER_PASSWORD;
         }
-        _this.testRailApi = new testrail_1.TestRail(reporterOptions);
-        _this.testRailValidation = new testrail_validation_1.TestRailValidation(reporterOptions);
+        _this.testRailApi = new testrail_1.TestRail(_this.reporterOptions);
+        _this.testRailValidation = new testrail_validation_1.TestRailValidation(_this.reporterOptions);
         TestRailCache.store('runCounter', runCounter);
-        _this.testRailValidation.validateReporterOptions(reporterOptions);
+        _this.testRailValidation.validateReporterOptions(_this.reporterOptions);
         var cliArguments = _this.testRailValidation.validateCLIArguments();
-        if (cliArguments.length == 0 && reporterOptions.suiteId) {
-            // skip reporter and don't start runner
+        if (cliArguments == undefined || cliArguments.length == 0) {
+            if (!_this.reporterOptions.suiteId) {
+                // skip reporter and don't start runner
+                TestRailLogger.warn('Reporter did not found a value of suiteId. Report will be skipped. If this is intentional please ignore.');
+                _this.suiteId = [];
+            }
+            else {
+                _this.suiteId = _this.reporterOptions.suiteId;
+            }
         }
         else {
+            _this.suiteId = cliArguments;
+        }
+        if (_this.suiteId.length != 0) {
             runner.on('start', function () {
                 /**
                 * creates a new TestRail Run
@@ -43,17 +55,21 @@ var CypressTestRailReporter = /** @class */ (function (_super) {
                 * which case that will be used and no new one created.
                 */
                 if (!TestRailCache.retrieve('runId')) {
-                    if (reporterOptions.suiteId) {
-                        var suiteId = reporterOptions.suiteId;
-                    }
-                    else {
-                        var suiteId = cliArguments;
+                    if (_this.reporterOptions.suiteId) {
+                        TestRailLogger.log("Following suiteId has been set in cypress.json file: " + _this.suiteId);
                     }
                     var executionDateTime = moment().format('MMM Do YYYY, HH:mm (Z)');
-                    var name_1 = (reporterOptions.runName || 'Automated test run') + " " + executionDateTime;
-                    var description = 'For the Cypress run visit https://dashboard.cypress.io/#/projects/runs';
+                    var name_1 = (_this.reporterOptions.runName || 'Automated test run') + " " + executionDateTime;
+                    if (_this.reporterOptions.disableDescription) {
+                        if (_this.reporterOptions.disableDescription === true) {
+                            var description = '';
+                        }
+                    }
+                    else {
+                        var description = 'For the Cypress run visit https://dashboard.cypress.io/#/projects/runs';
+                    }
                     TestRailLogger.log("Creating TestRail Run with name: " + name_1);
-                    _this.testRailApi.createRun(name_1, description, suiteId);
+                    _this.testRailApi.createRun(name_1, description, _this.suiteId);
                 }
                 else {
                     // use the cached TestRail Run ID
@@ -64,7 +80,7 @@ var CypressTestRailReporter = /** @class */ (function (_super) {
             runner.on('pass', function (test) {
                 _this.submitResults(testrail_interface_1.Status.Passed, test, "Execution time: " + test.duration + "ms");
             });
-            runner.on('fail', test, function (err) {
+            runner.on('fail', function (test, err) {
                 _this.submitResults(testrail_interface_1.Status.Failed, test, "" + err.message);
             });
             runner.on('retry', function (test) {
@@ -92,7 +108,7 @@ var CypressTestRailReporter = /** @class */ (function (_super) {
                 else {
                     _this.runId = TestRailCache.retrieve('runId');
                     var path = "runs/view/" + _this.runId;
-                    TestRailLogger.log("Results are published to " + chalk.magenta("https://" + _this.reporterOptions.domain + "/index.php?/" + path));
+                    TestRailLogger.log("Results are published to " + chalk.magenta("https://" + _this.reporterOptions.host + "/index.php?/" + path));
                 }
             });
         }
@@ -124,19 +140,21 @@ var CypressTestRailReporter = /** @class */ (function (_super) {
             var caseStatus = caseResults[0].status_id;
             Promise.all(caseResults).then(function () {
                 _this.testRailApi.publishResults(caseResults).then(function (loadedResults) {
-                    if (_this.reporterOptions.allowFailedScreenshotUpload && _this.reporterOptions.allowFailedScreenshotUpload === true) {
-                        if (caseStatus === testrail_interface_1.Status.Failed || caseStatus === testrail_interface_1.Status.Retest) {
-                            try {
-                                loadedResults.forEach(function (loadedResult) {
-                                    _this.testRailApi.addAttachmentToResult(caseResults, loadedResult['id']);
-                                });
+                    if (_this.reporterOptions.allowFailedScreenshotUpload) {
+                        if (_this.reporterOptions.allowFailedScreenshotUpload === true) {
+                            if (caseStatus === testrail_interface_1.Status.Failed || caseStatus === testrail_interface_1.Status.Retest) {
+                                try {
+                                    loadedResults.forEach(function (loadedResult) {
+                                        _this.testRailApi.addAttachmentToResult(caseResults, loadedResult['id']);
+                                    });
+                                }
+                                catch (err) {
+                                    console.log('Error on adding attachments for loaded results', err);
+                                }
                             }
-                            catch (err) {
-                                console.log('Error on adding attachments for loaded results', err);
+                            else {
+                                _this.testRailApi.counter = 1;
                             }
-                        }
-                        else {
-                            _this.testRailApi.counter = 1;
                         }
                     }
                 });

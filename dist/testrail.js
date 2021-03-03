@@ -39,6 +39,8 @@ var axios = require('axios');
 var find = require('find');
 var request = require('request');
 var fs = require('fs');
+var TestRailLogger = require('./testrail.logger');
+var TestRailCache = require('./testrail.cache');
 var TestRail = /** @class */ (function () {
     function TestRail(options) {
         this.options = options;
@@ -111,6 +113,7 @@ var TestRail = /** @class */ (function () {
         });
     };
     TestRail.prototype.deleteRun = function () {
+        this.runId = TestRailCache.retrieve('runId');
         axios({
             method: 'post',
             url: this.base + "/delete_run/" + this.runId,
@@ -122,6 +125,7 @@ var TestRail = /** @class */ (function () {
         }).catch(function (error) { return console.error(error); });
     };
     TestRail.prototype.publishResults = function (results) {
+        this.runId = TestRailCache.retrieve('runId');
         return axios({
             method: 'post',
             url: this.base + "/add_results_for_cases/" + this.runId,
@@ -193,6 +197,7 @@ var TestRail = /** @class */ (function () {
     };
     ;
     TestRail.prototype.closeRun = function () {
+        this.runId = TestRailCache.retrieve('runId');
         axios({
             method: 'post',
             url: this.base + "/close_run/" + this.runId,

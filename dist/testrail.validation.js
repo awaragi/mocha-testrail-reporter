@@ -1,18 +1,15 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+var TestRailLogger = require('./testrail.logger');
 var TestRailValidation = /** @class */ (function () {
     function TestRailValidation(options) {
         this.options = options;
     }
-    TestRailValidation.prototype.validateReporterOptions = function (options) {
-        if (!options) {
-            throw new Error('Missing cypress.json');
-        }
-        var reporterOptions = options.reporterOptions;
+    TestRailValidation.prototype.validateReporterOptions = function (reporterOptions) {
         if (!reporterOptions) {
             throw new Error('Missing reporterOptions in cypress.json');
         }
-        this.validate(reporterOptions, 'domain');
+        this.validate(reporterOptions, 'host');
         this.validate(reporterOptions, 'username');
         this.validate(reporterOptions, 'password');
         this.validate(reporterOptions, 'projectId');
@@ -44,30 +41,28 @@ var TestRailValidation = /** @class */ (function () {
                 break;
             }
         }
-        /**
-         * Search for specific variable in case that previous command contains multiple results
-         * Split variables
-         */
-        var resultArrayArgs = result.split(/,/);
-        for (index = 0; index < resultArrayArgs.length; ++index) {
-            value = resultArrayArgs[index];
-            if (value.includes('testRailSuiteId') === true) {
-                result = value;
-                break;
+        if (result != undefined) {
+            /**
+             * Search for specific variable in case that previous command contains multiple results
+             * Split variables
+             */
+            var resultArrayArgs = result.split(/,/);
+            for (index = 0; index < resultArrayArgs.length; ++index) {
+                value = resultArrayArgs[index];
+                if (value.includes('testRailSuiteId') === true) {
+                    result = value;
+                    break;
+                }
             }
+            // Split variable and value
+            var resultArray = result.split(/=/);
+            // Find value of suiteId and store it in envVariable
+            var suiteId = resultArray.find(function (el) { return el.length < 15; });
+            if (suiteId.length != 0) {
+                TestRailLogger.log("Following suiteId has been set in runtime environment variables: " + suiteId);
+            }
+            return suiteId;
         }
-        // Split variable and value
-        var resultArray = result.split(/=/);
-        // Find value of suiteId and store it in envVariable
-        var suiteId = resultArray.find(function (el) { return el.length < 15; });
-        if (suiteId.length == 0) {
-            TestRailLogger.warn('Missing testRailSuiteId argument, please check you CLI arguments. If this is intended please ignore.');
-        }
-        else {
-            TestRailLogger.log("Following suiteId has been passed through CLI arguments");
-            console.log(resultArray);
-        }
-        return suiteId;
     };
     /**
      * This function will count how many test spec files do we have during execution
