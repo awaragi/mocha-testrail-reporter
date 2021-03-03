@@ -35,7 +35,10 @@ var TestRailCache = {
     },
     purge: function () {
         if (fileExists()) {
-            fs.unlinkSync(cacheFileName);
+            fs.unlink(cacheFileName, function (err) {
+                if (err)
+                    throw err;
+            });
         }
         cacheData = {};
     }

@@ -98,6 +98,8 @@ var CypressTestRailReporter = /** @class */ (function (_super) {
                 }
                 else {
                     _this.testRailApi.closeRun();
+                    // Remove testrail-cache.txt file at the end of execution
+                    TestRailCache.purge();
                 }
                 /**
                  * Notify about the results at the end of execution
