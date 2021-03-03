@@ -93,6 +93,8 @@ export class CypressTestRailReporter extends reporters.Spec {
           runCounter++
         } else {
           this.testRailApi.closeRun();
+          // Remove testrail-cache.txt file at the end of execution
+          TestRailCache.purge();
         }
 
         /**
