@@ -2,6 +2,8 @@ const axios = require('axios');
 var find = require('find');
 var request = require('request');
 var fs = require('fs');
+var TestRailLogger = require('./testrail.logger');
+var TestRailCache = require('./testrail.cache');
 import { TestRailOptions, TestRailResult } from './testrail.interface';
 
 export class TestRail {
@@ -68,6 +70,7 @@ export class TestRail {
   }
 
   public deleteRun() {
+    this.runId = TestRailCache.retrieve('runId');
     axios({
       method: 'post',
       url: `${this.base}/delete_run/${this.runId}`,
@@ -80,6 +83,7 @@ export class TestRail {
   }
 
   public publishResults(results: TestRailResult[]) {
+    this.runId = TestRailCache.retrieve('runId');
     return axios({
       method: 'post',
       url: `${this.base}/add_results_for_cases/${this.runId}`,
@@ -149,6 +153,7 @@ export class TestRail {
   };
 
   public closeRun() {
+    this.runId = TestRailCache.retrieve('runId');
     axios({
       method: 'post',
       url: `${this.base}/close_run/${this.runId}`,

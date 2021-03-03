@@ -1,19 +1,16 @@
 import { TestRailOptions } from "./testrail.interface";
+var TestRailLogger = require('./testrail.logger');
 
 export class TestRailValidation {
 
   constructor(private options: TestRailOptions) {
   }
 
-  public validateReporterOptions (options) {
-    if (!options) {
-      throw new Error('Missing cypress.json');
-    }
-    var reporterOptions = options.reporterOptions;
+  public validateReporterOptions (reporterOptions) {
     if (!reporterOptions) {
       throw new Error('Missing reporterOptions in cypress.json');
     }
-    this.validate(reporterOptions, 'domain');
+    this.validate(reporterOptions, 'host');
     this.validate(reporterOptions, 'username');
     this.validate(reporterOptions, 'password');
     this.validate(reporterOptions, 'projectId');
@@ -47,30 +44,29 @@ export class TestRailValidation {
         break;
       }
     }
-    /**
-     * Search for specific variable in case that previous command contains multiple results
-     * Split variables
-     */
-    const resultArrayArgs = result.split(/,/);
-    for (index = 0; index < resultArrayArgs.length; ++index) {
-      value = resultArrayArgs[index];
-      if (value.includes('testRailSuiteId') === true) {
-        result = value;
-        break;
+    if (result != undefined) {
+      /**
+       * Search for specific variable in case that previous command contains multiple results
+       * Split variables
+       */
+      const resultArrayArgs = result.split(/,/);
+      for (index = 0; index < resultArrayArgs.length; ++index) {
+        value = resultArrayArgs[index];
+        if (value.includes('testRailSuiteId') === true) {
+          result = value;
+          break;
+        }
       }
+      // Split variable and value
+      const resultArray = result.split(/=/);
+      // Find value of suiteId and store it in envVariable
+      const suiteId = resultArray.find(el => el.length < 15)
+      if (suiteId.length != 0) {
+        TestRailLogger.log(`Following suiteId has been set in runtime environment variables: ${suiteId}`);
+      }
+      
+      return suiteId;
     }
-    // Split variable and value
-    const resultArray = result.split(/=/);
-    // Find value of suiteId and store it in envVariable
-    const suiteId = resultArray.find(el => el.length < 15)
-    if (suiteId.length == 0) {
-      TestRailLogger.warn('Missing testRailSuiteId argument, please check you CLI arguments. If this is intended please ignore.');
-    } else {
-      TestRailLogger.log(`Following suiteId has been passed through CLI arguments`);
-      console.log(resultArray);
-    }
-    
-    return suiteId;
   }
     
   /**
