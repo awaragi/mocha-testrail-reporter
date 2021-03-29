@@ -48,7 +48,7 @@ var TestRail = /** @class */ (function () {
         this.caseIds = [];
         this.base = options.host + "/index.php?/api/v2";
         this.runId;
-        this.counter = 1;
+        this.attempt = 1;
     }
     TestRail.prototype.getCases = function () {
         var url = this.base + "/get_cases/" + this.options.projectId + "&suite_id=" + this.options.suiteId;
@@ -168,25 +168,34 @@ var TestRail = /** @class */ (function () {
     TestRail.prototype.addAttachmentToResult = function (results, loadedResultId) {
         var _this = this;
         var caseId = results[0].case_id;
+        var storedCaseId = TestRailCache.retrieve('caseId');
+        /**
+         * This will ensure that we reset number of retries to the starting value
+         * when execution of current case is done, so that we can upload screenshots
+         * which are related to the current test execution
+        */
+        if (caseId != storedCaseId) {
+            this.attempt = 1;
+        }
+        /**
+         * Based on those two regex we are searching for failed screenshot
+         * If retry cypress feature is enabled it will search for each
+         * failed attempt and upload to corresponding test result (instead aggregating under the same result comment)
+         */
+        var regex1 = new RegExp(/(\W|^)failed(\W|^).png/g);
+        var regex2 = new RegExp('attempt ' + this.attempt, 'g');
         try {
             find.file('./cypress/screenshots/', function (files) {
                 files.filter(function (file) { return file.includes("C" + caseId); }).forEach(function (screenshot) {
-                    if (_this.counter === 1) {
-                        if (screenshot.includes('(failed).png') === true) {
+                    switch (true) {
+                        case (regex1.test(screenshot) && _this.attempt == 1):
                             _this.loadAttachment(loadedResultId, screenshot);
-                            _this.counter++;
-                        }
-                    }
-                    else if (_this.counter === 2) {
-                        if (screenshot.includes('(attempt 2).png') === true) {
+                            _this.attempt++;
+                            break;
+                        case (regex2.test(screenshot)):
                             _this.loadAttachment(loadedResultId, screenshot);
-                            _this.counter++;
-                        }
-                    }
-                    else {
-                        if (screenshot.includes('(attempt 3).png') === true) {
-                            _this.loadAttachment(loadedResultId, screenshot);
-                        }
+                            _this.attempt++;
+                            break;
                     }
                 });
             });

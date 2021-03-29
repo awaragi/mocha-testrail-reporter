@@ -4,8 +4,8 @@ import { TestRail } from './testrail';
 import { titleToCaseIds } from './shared';
 import { Status, TestRailResult } from './testrail.interface';
 import { TestRailValidation } from './testrail.validation';
-var TestRailCache = require('./testrail.cache');
-var TestRailLogger = require('./testrail.logger');
+const TestRailCache = require('./testrail.cache');
+const TestRailLogger = require('./testrail.logger');
 const chalk = require('chalk');
 var runCounter = 1;
 
@@ -15,7 +15,8 @@ export class CypressTestRailReporter extends reporters.Spec {
   private testRailValidation: TestRailValidation;
   private runId: number;
   private reporterOptions: any;
-  private suiteId: any;
+  private suiteId: any = [];
+  private allowFailedScreenshotUpload: Boolean = false;
 
   constructor(runner: any, options: any) {
     super(runner);
@@ -29,20 +30,36 @@ export class CypressTestRailReporter extends reporters.Spec {
     this.testRailApi = new TestRail(this.reporterOptions);
     this.testRailValidation = new TestRailValidation(this.reporterOptions);
 
-    TestRailCache.store('runCounter', runCounter);
+    /**
+     * This will validate reporter options defined in cypress.json file
+     * if we are passing suiteId as a part of this file than we assign value to variable
+     * usually this is the case for single suite projects
+     */
     this.testRailValidation.validateReporterOptions(this.reporterOptions);
+    if (this.reporterOptions.suiteId) {
+      this.suiteId = this.reporterOptions.suiteId
+    }
+    /**
+     * This will validate runtime environment variables
+     * if we are passing suiteId as a part of runtime env variables we assign that value to variable
+     * usually we use this way for multi suite projects
+     */
     const cliArguments = this.testRailValidation.validateCLIArguments();
+    if (cliArguments && cliArguments.length) {
+      this.suiteId = cliArguments
+    }
 
-    if (cliArguments == undefined || cliArguments.length == 0) {
-      if (!this.reporterOptions.suiteId) {
-        // skip reporter and don't start runner
-        TestRailLogger.warn('Reporter did not found a value of suiteId. Report will be skipped. If this is intentional please ignore.');
-        this.suiteId = [];
-      } else { this.suiteId = this.reporterOptions.suiteId }
-    } else { this.suiteId = cliArguments }
-
-    if (this.suiteId.length != 0) {
+    /**
+     * If no suiteId has been passed with previous two methods
+     * runner will not be triggered
+     */
+    if (this.suiteId && this.suiteId.toString().length) {
       runner.on('start', () => {
+        /**
+        * runCounter is used to count how many spec files we have during one run
+        * in order to wait for close test run function
+        */
+        TestRailCache.store('runCounter', runCounter);
         /**
         * creates a new TestRail Run
         * unless a cached value already exists for an existing TestRail Run in
@@ -55,9 +72,7 @@ export class CypressTestRailReporter extends reporters.Spec {
             const executionDateTime = moment().format('MMM Do YYYY, HH:mm (Z)');
             const name = `${this.reporterOptions.runName || 'Automated test run'} ${executionDateTime}`;
             if (this.reporterOptions.disableDescription) {
-              if (this.reporterOptions.disableDescription === true) {
-                var description = '';
-              }
+              var description = '';
             } else {
               var description = 'For the Cypress run visit https://dashboard.cypress.io/#/projects/runs';
             }
@@ -93,7 +108,9 @@ export class CypressTestRailReporter extends reporters.Spec {
           runCounter++
         } else {
           this.testRailApi.closeRun();
-          // Remove testrail-cache.txt file at the end of execution
+          /**
+           * Remove testrail-cache.txt file at the end of execution
+           */
           TestRailCache.purge();
         }
 
@@ -118,36 +135,34 @@ export class CypressTestRailReporter extends reporters.Spec {
    * Note: Uploading of screenshot is configurable option
    */
   public submitResults (status, test, comment) {
+    if (this.reporterOptions.allowFailedScreenshotUpload) {
+      this.allowFailedScreenshotUpload = this.reporterOptions.allowFailedScreenshotUpload;
+    }
     const caseIds = titleToCaseIds(test.title);
-    if (caseIds.length > 0) {
-      var caseResults = caseIds.map(caseId => {
+    if (caseIds.length) {
+      const caseResults = caseIds.map(caseId => {
         return {
           case_id: caseId,
           status_id: status,
           comment: comment,
         };
       });
-    }
-    if (caseResults === undefined) {
-      //Do nothing since no tests were matched with TestRail
-    } else {
       this.results.push(...caseResults);
-      var caseStatus = caseResults[0].status_id
+      const caseStatus = caseResults[0].status_id;
       Promise.all(caseResults).then(() => {
         this.testRailApi.publishResults(caseResults).then(loadedResults => {
-          if (this.reporterOptions.allowFailedScreenshotUpload) {
-            if(this.reporterOptions.allowFailedScreenshotUpload === true) {
-              if(caseStatus === Status.Failed || caseStatus === Status.Retest) {
-                try {
-                  loadedResults.forEach((loadedResult) => {
-                    this.testRailApi.addAttachmentToResult(caseResults, loadedResult['id']);
-                  })
-                } catch (err) {
-                  console.log('Error on adding attachments for loaded results', err)
-                }
-              } else {
-                this.testRailApi.counter = 1
+          if (this.allowFailedScreenshotUpload === true) {
+            if (caseStatus === Status.Failed || caseStatus === Status.Retest) {
+              try {
+                loadedResults.forEach((loadedResult) => {
+                  this.testRailApi.addAttachmentToResult(caseResults, loadedResult['id']);
+                  TestRailCache.store('caseId', caseIds);
+                })
+              } catch (err) {
+                console.log('Error on adding attachments for loaded results', err)
               }
+            } else {
+              this.testRailApi.attempt = 1;
             }
           }
         })

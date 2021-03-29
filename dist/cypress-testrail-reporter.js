@@ -25,30 +25,43 @@ var CypressTestRailReporter = /** @class */ (function (_super) {
     function CypressTestRailReporter(runner, options) {
         var _this = _super.call(this, runner) || this;
         _this.results = [];
+        _this.suiteId = [];
+        _this.allowFailedScreenshotUpload = false;
         _this.reporterOptions = options.reporterOptions;
         if (process.env.CYPRESS_TESTRAIL_REPORTER_PASSWORD) {
             _this.reporterOptions.password = process.env.CYPRESS_TESTRAIL_REPORTER_PASSWORD;
         }
         _this.testRailApi = new testrail_1.TestRail(_this.reporterOptions);
         _this.testRailValidation = new testrail_validation_1.TestRailValidation(_this.reporterOptions);
-        TestRailCache.store('runCounter', runCounter);
+        /**
+         * This will validate reporter options defined in cypress.json file
+         * if we are passing suiteId as a part of this file than we assign value to variable
+         * usually this is the case for single suite projects
+         */
         _this.testRailValidation.validateReporterOptions(_this.reporterOptions);
-        var cliArguments = _this.testRailValidation.validateCLIArguments();
-        if (cliArguments == undefined || cliArguments.length == 0) {
-            if (!_this.reporterOptions.suiteId) {
-                // skip reporter and don't start runner
-                TestRailLogger.warn('Reporter did not found a value of suiteId. Report will be skipped. If this is intentional please ignore.');
-                _this.suiteId = [];
-            }
-            else {
-                _this.suiteId = _this.reporterOptions.suiteId;
-            }
+        if (_this.reporterOptions.suiteId) {
+            _this.suiteId = _this.reporterOptions.suiteId;
         }
-        else {
+        /**
+         * This will validate runtime environment variables
+         * if we are passing suiteId as a part of runtime env variables we assign that value to variable
+         * usually we use this way for multi suite projects
+         */
+        var cliArguments = _this.testRailValidation.validateCLIArguments();
+        if (cliArguments && cliArguments.length) {
             _this.suiteId = cliArguments;
         }
-        if (_this.suiteId.length != 0) {
+        /**
+         * If no suiteId has been passed with previous two methods
+         * runner will not be triggered
+         */
+        if (_this.suiteId && _this.suiteId.toString().length) {
             runner.on('start', function () {
+                /**
+                * runCounter is used to count how many spec files we have during one run
+                * in order to wait for close test run function
+                */
+                TestRailCache.store('runCounter', runCounter);
                 /**
                 * creates a new TestRail Run
                 * unless a cached value already exists for an existing TestRail Run in
@@ -61,9 +74,7 @@ var CypressTestRailReporter = /** @class */ (function (_super) {
                     var executionDateTime = moment().format('MMM Do YYYY, HH:mm (Z)');
                     var name_1 = (_this.reporterOptions.runName || 'Automated test run') + " " + executionDateTime;
                     if (_this.reporterOptions.disableDescription) {
-                        if (_this.reporterOptions.disableDescription === true) {
-                            var description = '';
-                        }
+                        var description = '';
                     }
                     else {
                         var description = 'For the Cypress run visit https://dashboard.cypress.io/#/projects/runs';
@@ -98,7 +109,9 @@ var CypressTestRailReporter = /** @class */ (function (_super) {
                 }
                 else {
                     _this.testRailApi.closeRun();
-                    // Remove testrail-cache.txt file at the end of execution
+                    /**
+                     * Remove testrail-cache.txt file at the end of execution
+                     */
                     TestRailCache.purge();
                 }
                 /**
@@ -124,39 +137,36 @@ var CypressTestRailReporter = /** @class */ (function (_super) {
      */
     CypressTestRailReporter.prototype.submitResults = function (status, test, comment) {
         var _this = this;
+        if (this.reporterOptions.allowFailedScreenshotUpload) {
+            this.allowFailedScreenshotUpload = this.reporterOptions.allowFailedScreenshotUpload;
+        }
         var caseIds = shared_1.titleToCaseIds(test.title);
-        if (caseIds.length > 0) {
-            var caseResults = caseIds.map(function (caseId) {
+        if (caseIds.length) {
+            var caseResults_1 = caseIds.map(function (caseId) {
                 return {
                     case_id: caseId,
                     status_id: status,
                     comment: comment,
                 };
             });
-        }
-        if (caseResults === undefined) {
-            //Do nothing since no tests were matched with TestRail
-        }
-        else {
-            (_a = this.results).push.apply(_a, caseResults);
-            var caseStatus = caseResults[0].status_id;
-            Promise.all(caseResults).then(function () {
-                _this.testRailApi.publishResults(caseResults).then(function (loadedResults) {
-                    if (_this.reporterOptions.allowFailedScreenshotUpload) {
-                        if (_this.reporterOptions.allowFailedScreenshotUpload === true) {
-                            if (caseStatus === testrail_interface_1.Status.Failed || caseStatus === testrail_interface_1.Status.Retest) {
-                                try {
-                                    loadedResults.forEach(function (loadedResult) {
-                                        _this.testRailApi.addAttachmentToResult(caseResults, loadedResult['id']);
-                                    });
-                                }
-                                catch (err) {
-                                    console.log('Error on adding attachments for loaded results', err);
-                                }
+            (_a = this.results).push.apply(_a, caseResults_1);
+            var caseStatus_1 = caseResults_1[0].status_id;
+            Promise.all(caseResults_1).then(function () {
+                _this.testRailApi.publishResults(caseResults_1).then(function (loadedResults) {
+                    if (_this.allowFailedScreenshotUpload === true) {
+                        if (caseStatus_1 === testrail_interface_1.Status.Failed || caseStatus_1 === testrail_interface_1.Status.Retest) {
+                            try {
+                                loadedResults.forEach(function (loadedResult) {
+                                    _this.testRailApi.addAttachmentToResult(caseResults_1, loadedResult['id']);
+                                    TestRailCache.store('caseId', caseIds);
+                                });
                             }
-                            else {
-                                _this.testRailApi.counter = 1;
+                            catch (err) {
+                                console.log('Error on adding attachments for loaded results', err);
                             }
+                        }
+                        else {
+                            _this.testRailApi.attempt = 1;
                         }
                     }
                 });

@@ -1,9 +1,9 @@
 const axios = require('axios');
-var find = require('find');
-var request = require('request');
-var fs = require('fs');
-var TestRailLogger = require('./testrail.logger');
-var TestRailCache = require('./testrail.cache');
+const find = require('find');
+const request = require('request');
+const fs = require('fs');
+const TestRailLogger = require('./testrail.logger');
+const TestRailCache = require('./testrail.cache');
 import { TestRailOptions, TestRailResult } from './testrail.interface';
 
 export class TestRail {
@@ -11,12 +11,13 @@ export class TestRail {
   private runId: Number;
   private includeAll: Boolean = true;
   private caseIds: Number[] = [];
-  public counter: number;
+  public attempt: number;
+  private retries: number;
 
   constructor(private options: TestRailOptions) {
     this.base = `${options.host}/index.php?/api/v2`;
     this.runId;
-    this.counter = 1;
+    this.attempt = 1;
   }
 
   public getCases () {
@@ -126,24 +127,35 @@ export class TestRail {
 
   // This function will attach failed screenshot on each test result(comment) if founds it
   public addAttachmentToResult (results, loadedResultId) {
-  var caseId = results[0].case_id
+    const caseId = results[0].case_id;
+    const storedCaseId = TestRailCache.retrieve('caseId');
+    /**
+     * This will ensure that we reset number of retries to the starting value
+     * when execution of current case is done, so that we can upload screenshots 
+     * which are related to the current test execution
+    */
+    if (caseId != storedCaseId) {
+      this.attempt = 1;
+    }
+    /**
+     * Based on those two regex we are searching for failed screenshot
+     * If retry cypress feature is enabled it will search for each
+     * failed attempt and upload to corresponding test result (instead aggregating under the same result comment)
+     */
+    const regex1 = new RegExp(/(\W|^)failed(\W|^).png/g);
+    const regex2 = new RegExp('attempt ' + this.attempt, 'g');
     try {
       find.file('./cypress/screenshots/', (files) => {
         files.filter(file => file.includes(`C${caseId}`)).forEach(screenshot => {
-          if(this.counter === 1) { 
-            if (screenshot.includes('(failed).png') === true) {
-              this.loadAttachment(loadedResultId, screenshot)
-              this.counter++
-            }
-          } else if (this.counter === 2) {
-            if (screenshot.includes('(attempt 2).png') === true) {
-              this.loadAttachment(loadedResultId, screenshot)
-              this.counter++
-            }
-          } else {
-            if (screenshot.includes('(attempt 3).png') === true) {
-              this.loadAttachment(loadedResultId, screenshot)
-            }
+          switch(true) {
+            case (regex1.test(screenshot) && this.attempt == 1):
+              this.loadAttachment(loadedResultId, screenshot);
+              this.attempt++
+              break;
+            case (regex2.test(screenshot)):
+              this.loadAttachment(loadedResultId, screenshot);
+              this.attempt++
+              break;
           }
         })
       });

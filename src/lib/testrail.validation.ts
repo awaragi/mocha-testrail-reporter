@@ -1,5 +1,5 @@
 import { TestRailOptions } from "./testrail.interface";
-var TestRailLogger = require('./testrail.logger');
+const TestRailLogger = require('./testrail.logger');
 
 export class TestRailValidation {
 
