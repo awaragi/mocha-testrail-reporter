@@ -3,89 +3,170 @@ import * as moment from 'moment';
 import { TestRail } from './testrail';
 import { titleToCaseIds } from './shared';
 import { Status, TestRailResult } from './testrail.interface';
+import { TestRailValidation } from './testrail.validation';
+const TestRailCache = require('./testrail.cache');
+const TestRailLogger = require('./testrail.logger');
 const chalk = require('chalk');
+var runCounter = 1;
 
 export class CypressTestRailReporter extends reporters.Spec {
   private results: TestRailResult[] = [];
-  private testRail: TestRail;
+  private testRailApi: TestRail;
+  private testRailValidation: TestRailValidation;
+  private runId: number;
+  private reporterOptions: any;
+  private suiteId: any = [];
+  private allowFailedScreenshotUpload: Boolean = false;
 
   constructor(runner: any, options: any) {
     super(runner);
 
-    let reporterOptions = options.reporterOptions;
+    this.reporterOptions = options.reporterOptions;
 
     if (process.env.CYPRESS_TESTRAIL_REPORTER_PASSWORD) {
-      reporterOptions.password = process.env.CYPRESS_TESTRAIL_REPORTER_PASSWORD;
+      this.reporterOptions.password = process.env.CYPRESS_TESTRAIL_REPORTER_PASSWORD;
     }
 
-    this.testRail = new TestRail(reporterOptions);
-    this.validate(reporterOptions, 'host');
-    this.validate(reporterOptions, 'username');
-    this.validate(reporterOptions, 'password');
-    this.validate(reporterOptions, 'projectId');
-    this.validate(reporterOptions, 'suiteId');
+    this.testRailApi = new TestRail(this.reporterOptions);
+    this.testRailValidation = new TestRailValidation(this.reporterOptions);
 
-    runner.on('start', () => {
-      const executionDateTime = moment().format('MMM Do YYYY, HH:mm (Z)');
-      const name = `${reporterOptions.runName || 'Automated test run'} ${executionDateTime}`;
-      const description = 'For the Cypress run visit https://dashboard.cypress.io/#/projects/runs';
-      this.testRail.createRun(name, description);
-    });
+    /**
+     * This will validate reporter options defined in cypress.json file
+     * if we are passing suiteId as a part of this file than we assign value to variable
+     * usually this is the case for single suite projects
+     */
+    this.testRailValidation.validateReporterOptions(this.reporterOptions);
+    if (this.reporterOptions.suiteId) {
+      this.suiteId = this.reporterOptions.suiteId
+    }
+    /**
+     * This will validate runtime environment variables
+     * if we are passing suiteId as a part of runtime env variables we assign that value to variable
+     * usually we use this way for multi suite projects
+     */
+    const cliArguments = this.testRailValidation.validateCLIArguments();
+    if (cliArguments && cliArguments.length) {
+      this.suiteId = cliArguments
+    }
 
-    runner.on('pass', test => {
-      const caseIds = titleToCaseIds(test.title);
-      if (caseIds.length > 0) {
-        const results = caseIds.map(caseId => {
-          return {
-            case_id: caseId,
-            status_id: Status.Passed,
-            comment: `Execution time: ${test.duration}ms`,
-            elapsed: `${test.duration/1000}s`
-          };
-        });
-        this.results.push(...results);
-      }
-    });
+    /**
+     * If no suiteId has been passed with previous two methods
+     * runner will not be triggered
+     */
+    if (this.suiteId && this.suiteId.toString().length) {
+      runner.on('start', () => {
+        /**
+        * runCounter is used to count how many spec files we have during one run
+        * in order to wait for close test run function
+        */
+        TestRailCache.store('runCounter', runCounter);
+        /**
+        * creates a new TestRail Run
+        * unless a cached value already exists for an existing TestRail Run in
+        * which case that will be used and no new one created.
+        */
+        if (!TestRailCache.retrieve('runId')) {
+            if (this.reporterOptions.suiteId) {
+              TestRailLogger.log(`Following suiteId has been set in cypress.json file: ${this.suiteId}`);
+            }
+            const executionDateTime = moment().format('MMM Do YYYY, HH:mm (Z)');
+            const name = `${this.reporterOptions.runName || 'Automated test run'} ${executionDateTime}`;
+            if (this.reporterOptions.disableDescription) {
+              var description = '';
+            } else {
+              var description = 'For the Cypress run visit https://dashboard.cypress.io/#/projects/runs';
+            }
+            TestRailLogger.log(`Creating TestRail Run with name: ${name}`);
+            this.testRailApi.createRun(name, description, this.suiteId);
+        } else {
+            // use the cached TestRail Run ID
+            this.runId = TestRailCache.retrieve('runId');
+            TestRailLogger.log(`Using existing TestRail Run with ID: '${this.runId}'`);
+        }
+      });
 
-    runner.on('fail', test => {
-      const caseIds = titleToCaseIds(test.title);
-      if (caseIds.length > 0) {
-        const results = caseIds.map(caseId => {
-          return {
-            case_id: caseId,
-            status_id: Status.Failed,
-            comment: `${test.err.message}`,
-          };
-        });
-        this.results.push(...results);
-      }
-    });
+      runner.on('pass', test => {
+        this.submitResults(Status.Passed, test, `Execution time: ${test.duration}ms`);
+      });
 
-    runner.on('end', () => {
-      if (this.results.length == 0) {
-        console.log('\n', chalk.magenta.underline.bold('(TestRail Reporter)'));
-        console.warn(
-          '\n',
-          'No testcases were matched. Ensure that your tests are declared correctly and matches Cxxx',
-          '\n'
-        );
-        this.testRail.deleteRun();
+      runner.on('fail', (test, err) => {
+        this.submitResults(Status.Failed, test, `${err.message}`);
+      });
 
-        return;
-      }
+      runner.on('retry', test => {
+        this.submitResults(Status.Retest, test, 'Cypress retry logic has been triggered!');
+      });
 
-      // publish test cases results & close the run
-      this.testRail.publishResults(this.results)
-        .then(() => this.testRail.closeRun());
-    });
+      runner.on('end', () => {
+        /**
+         * When we reach final number of spec files 
+         * we should close test run at the end
+         */
+        var numSpecFiles = this.testRailValidation.countTestSpecFiles();
+        var counter = TestRailCache.retrieve('runCounter');
+        if (numSpecFiles.length > counter) {
+          runCounter++
+        } else {
+          this.testRailApi.closeRun();
+          /**
+           * Remove testrail-cache.txt file at the end of execution
+           */
+          TestRailCache.purge();
+        }
+
+        /**
+         * Notify about the results at the end of execution
+         */
+        if (this.results.length == 0) {
+          TestRailLogger.warn('No testcases were matched with TestRail. Ensure that your tests are declared correctly and titles contain matches to format of Cxxxx');
+        } else {
+          this.runId = TestRailCache.retrieve('runId');
+          var path = `runs/view/${this.runId}`;
+          TestRailLogger.log(`Results are published to ${chalk.magenta(`https://${this.reporterOptions.host}/index.php?/${path}`)}`);
+        }
+      });
+    }
   }
 
-  private validate(options, name: string) {
-    if (options == null) {
-      throw new Error('Missing reporterOptions in cypress.json');
+  /**
+   * Ensure that after each test results are reported continuously
+   * Additionally to that if test status is failed or retried there is possibility 
+   * to upload failed screenshot for easier debugging in TestRail
+   * Note: Uploading of screenshot is configurable option
+   */
+  public submitResults (status, test, comment) {
+    if (this.reporterOptions.allowFailedScreenshotUpload) {
+      this.allowFailedScreenshotUpload = this.reporterOptions.allowFailedScreenshotUpload;
     }
-    if (options[name] == null) {
-      throw new Error(`Missing ${name} value. Please update reporterOptions in cypress.json`);
+    const caseIds = titleToCaseIds(test.title);
+    if (caseIds.length) {
+      const caseResults = caseIds.map(caseId => {
+        return {
+          case_id: caseId,
+          status_id: status,
+          comment: comment,
+        };
+      });
+      this.results.push(...caseResults);
+      const caseStatus = caseResults[0].status_id;
+      Promise.all(caseResults).then(() => {
+        this.testRailApi.publishResults(caseResults).then(loadedResults => {
+          if (this.allowFailedScreenshotUpload === true) {
+            if (caseStatus === Status.Failed || caseStatus === Status.Retest) {
+              try {
+                loadedResults.forEach((loadedResult) => {
+                  this.testRailApi.addAttachmentToResult(caseResults, loadedResult['id']);
+                  TestRailCache.store('caseId', caseIds);
+                })
+              } catch (err) {
+                console.log('Error on adding attachments for loaded results', err)
+              }
+            } else {
+              this.testRailApi.attempt = 1;
+            }
+          }
+        })
+      });
     }
   }
 }
