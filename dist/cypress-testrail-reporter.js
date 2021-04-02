@@ -154,14 +154,14 @@ var CypressTestRailReporter = /** @class */ (function (_super) {
                 };
             });
             (_a = this.results).push.apply(_a, caseResults);
-            this.testRailApi.publishResults(caseResults).then(function (publishedResults) {
-                if (_this.reporterOptions.allowFailedScreenshotUpload === true &&
-                    (status === testrail_interface_1.Status.Failed || status === testrail_interface_1.Status.Retest)) {
-                    publishedResults.forEach(function (result) {
-                        _this.testRailApi.uploadScreenshots(caseIds[0], result.id);
-                    });
-                }
-            });
+            var publishedResults = this.testRailApi.publishResults(caseResults);
+            if (publishedResults !== undefined &&
+                this.reporterOptions.allowFailedScreenshotUpload === true &&
+                (status === testrail_interface_1.Status.Failed || status === testrail_interface_1.Status.Retest)) {
+                publishedResults.forEach(function (result) {
+                    _this.testRailApi.uploadScreenshots(caseIds[0], result.id);
+                });
+            }
         }
         var _a;
     };

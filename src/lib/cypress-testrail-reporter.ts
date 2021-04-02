@@ -154,16 +154,16 @@ export class CypressTestRailReporter extends reporters.Spec {
         };
       });
       this.results.push(...caseResults);
-      this.testRailApi.publishResults(caseResults).then(publishedResults => {
-        if (
-          this.reporterOptions.allowFailedScreenshotUpload === true &&
-          (status === Status.Failed || status === Status.Retest)
-        ) {
-          publishedResults.forEach((result) => {
-            this.testRailApi.uploadScreenshots(caseIds[0], result.id);
-          })
-        }
-      })
+      const publishedResults = this.testRailApi.publishResults(caseResults)
+      if (
+        publishedResults !== undefined &&
+        this.reporterOptions.allowFailedScreenshotUpload === true &&
+        (status === Status.Failed || status === Status.Retest)
+      ) {
+        publishedResults.forEach((result) => {
+          this.testRailApi.uploadScreenshots(caseIds[0], result.id);
+        })
+      }
     }
   }
 }
