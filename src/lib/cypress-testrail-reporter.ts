@@ -125,7 +125,7 @@ export class CypressTestRailReporter extends reporters.Spec {
         } else {
           this.runId = TestRailCache.retrieve('runId');
           var path = `runs/view/${this.runId}`;
-          TestRailLogger.log(`Results are published to ${chalk.magenta(`https://${this.reporterOptions.host}/index.php?/${path}`)}`);
+          TestRailLogger.log(`Results are published to ${chalk.magenta(`${this.reporterOptions.host}/index.php?/${path}`)}`);
         }
       });
     }

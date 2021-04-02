@@ -125,7 +125,7 @@ var CypressTestRailReporter = /** @class */ (function (_super) {
                 else {
                     _this.runId = TestRailCache.retrieve('runId');
                     var path = "runs/view/" + _this.runId;
-                    TestRailLogger.log("Results are published to " + chalk.magenta("https://" + _this.reporterOptions.host + "/index.php?/" + path));
+                    TestRailLogger.log("Results are published to " + chalk.magenta(_this.reporterOptions.host + "/index.php?/" + path));
                 }
             });
         }
