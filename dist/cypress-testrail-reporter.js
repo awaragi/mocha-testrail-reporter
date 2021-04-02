@@ -27,6 +27,9 @@ var CypressTestRailReporter = /** @class */ (function (_super) {
         _this.results = [];
         _this.suiteId = [];
         _this.reporterOptions = options.reporterOptions;
+        if (process.env.CYPRESS_TESTRAIL_REPORTER_USERNAME) {
+            _this.reporterOptions.username = process.env.CYPRESS_TESTRAIL_REPORTER_USERNAME;
+        }
         if (process.env.CYPRESS_TESTRAIL_REPORTER_PASSWORD) {
             _this.reporterOptions.password = process.env.CYPRESS_TESTRAIL_REPORTER_PASSWORD;
         }

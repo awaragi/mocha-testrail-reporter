@@ -89,7 +89,8 @@ it("Can authenticate a valid userC123", ...
 
 **host**: _string_ host of your TestRail instance (e.g. for a hosted instance _https://instance.testrail.com_).
 
-**username**: _string_ email of the user under which the test run will be created.
+**username**: _string_ email of the user under which the test run will be created. When you set `CYPRESS_TESTRAIL_REPORTER_USERNAME` in
+environment variables, this option would be overwritten with it.
 
 **password**: _string_ password or the API key for the aforementioned user. When you set `CYPRESS_TESTRAIL_REPORTER_PASSWORD` in runtime environment variables, this option would be overwritten with it.
 

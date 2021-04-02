@@ -22,6 +22,10 @@ export class CypressTestRailReporter extends reporters.Spec {
 
     this.reporterOptions = options.reporterOptions;
 
+    if (process.env.CYPRESS_TESTRAIL_REPORTER_USERNAME) {
+      this.reporterOptions.username = process.env.CYPRESS_TESTRAIL_REPORTER_USERNAME;
+    }
+
     if (process.env.CYPRESS_TESTRAIL_REPORTER_PASSWORD) {
       this.reporterOptions.password = process.env.CYPRESS_TESTRAIL_REPORTER_PASSWORD;
     }
