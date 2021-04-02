@@ -140,6 +140,11 @@ var CypressTestRailReporter = /** @class */ (function (_super) {
     CypressTestRailReporter.prototype.submitResults = function (status, test, comment) {
         var _this = this;
         var caseIds = shared_1.titleToCaseIds(test.title);
+        var serverTestCaseIds = this.testRailApi.getCases();
+        var invalidCaseIds = caseIds.filter(function (caseId) { return !serverTestCaseIds.includes(caseId); });
+        caseIds = caseIds.filter(function (caseId) { return serverTestCaseIds.includes(caseId); });
+        if (invalidCaseIds.length > 0)
+            TestRailLogger.log("The following test IDs were found in Cypress tests, but not found in Testrail: " + invalidCaseIds);
         if (caseIds.length) {
             var caseResults = caseIds.map(function (caseId) {
                 return {

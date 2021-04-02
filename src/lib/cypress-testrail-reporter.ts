@@ -138,7 +138,13 @@ export class CypressTestRailReporter extends reporters.Spec {
    * Note: Uploading of screenshot is configurable option
    */
   public submitResults (status, test, comment) {
-    const caseIds = titleToCaseIds(test.title);
+    let caseIds = titleToCaseIds(test.title)
+    const serverTestCaseIds = this.testRailApi.getCases()
+    const invalidCaseIds = caseIds.filter(caseId => !serverTestCaseIds.includes(caseId));
+    caseIds = caseIds.filter(caseId => serverTestCaseIds.includes(caseId))
+    if (invalidCaseIds.length > 0)
+      TestRailLogger.log(`The following test IDs were found in Cypress tests, but not found in Testrail: ${invalidCaseIds}`)
+
     if (caseIds.length) {
       const caseResults = caseIds.map(caseId => {
         return {
