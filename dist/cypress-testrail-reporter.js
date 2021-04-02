@@ -26,7 +26,6 @@ var CypressTestRailReporter = /** @class */ (function (_super) {
         var _this = _super.call(this, runner) || this;
         _this.results = [];
         _this.suiteId = [];
-        _this.allowFailedScreenshotUpload = false;
         _this.reporterOptions = options.reporterOptions;
         if (process.env.CYPRESS_TESTRAIL_REPORTER_PASSWORD) {
             _this.reporterOptions.password = process.env.CYPRESS_TESTRAIL_REPORTER_PASSWORD;
@@ -137,39 +136,23 @@ var CypressTestRailReporter = /** @class */ (function (_super) {
      */
     CypressTestRailReporter.prototype.submitResults = function (status, test, comment) {
         var _this = this;
-        if (this.reporterOptions.allowFailedScreenshotUpload) {
-            this.allowFailedScreenshotUpload = this.reporterOptions.allowFailedScreenshotUpload;
-        }
         var caseIds = shared_1.titleToCaseIds(test.title);
         if (caseIds.length) {
-            var caseResults_1 = caseIds.map(function (caseId) {
+            var caseResults = caseIds.map(function (caseId) {
                 return {
                     case_id: caseId,
                     status_id: status,
                     comment: comment,
                 };
             });
-            (_a = this.results).push.apply(_a, caseResults_1);
-            var caseStatus_1 = caseResults_1[0].status_id;
-            Promise.all(caseResults_1).then(function () {
-                _this.testRailApi.publishResults(caseResults_1).then(function (loadedResults) {
-                    if (_this.allowFailedScreenshotUpload === true) {
-                        if (caseStatus_1 === testrail_interface_1.Status.Failed || caseStatus_1 === testrail_interface_1.Status.Retest) {
-                            try {
-                                loadedResults.forEach(function (loadedResult) {
-                                    _this.testRailApi.addAttachmentToResult(caseResults_1, loadedResult['id']);
-                                    TestRailCache.store('caseId', caseIds);
-                                });
-                            }
-                            catch (err) {
-                                console.log('Error on adding attachments for loaded results', err);
-                            }
-                        }
-                        else {
-                            _this.testRailApi.attempt = 1;
-                        }
-                    }
-                });
+            (_a = this.results).push.apply(_a, caseResults);
+            this.testRailApi.publishResults(caseResults).then(function (publishedResults) {
+                if (_this.reporterOptions.allowFailedScreenshotUpload === true &&
+                    (status === testrail_interface_1.Status.Failed || status === testrail_interface_1.Status.Retest)) {
+                    publishedResults.forEach(function (result) {
+                        _this.testRailApi.uploadScreenshots(caseIds[0], result.id);
+                    });
+                }
             });
         }
         var _a;

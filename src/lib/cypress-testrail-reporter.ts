@@ -16,7 +16,6 @@ export class CypressTestRailReporter extends reporters.Spec {
   private runId: number;
   private reporterOptions: any;
   private suiteId: any = [];
-  private allowFailedScreenshotUpload: Boolean = false;
 
   constructor(runner: any, options: any) {
     super(runner);
@@ -135,9 +134,6 @@ export class CypressTestRailReporter extends reporters.Spec {
    * Note: Uploading of screenshot is configurable option
    */
   public submitResults (status, test, comment) {
-    if (this.reporterOptions.allowFailedScreenshotUpload) {
-      this.allowFailedScreenshotUpload = this.reporterOptions.allowFailedScreenshotUpload;
-    }
     const caseIds = titleToCaseIds(test.title);
     if (caseIds.length) {
       const caseResults = caseIds.map(caseId => {
@@ -148,25 +144,16 @@ export class CypressTestRailReporter extends reporters.Spec {
         };
       });
       this.results.push(...caseResults);
-      const caseStatus = caseResults[0].status_id;
-      Promise.all(caseResults).then(() => {
-        this.testRailApi.publishResults(caseResults).then(loadedResults => {
-          if (this.allowFailedScreenshotUpload === true) {
-            if (caseStatus === Status.Failed || caseStatus === Status.Retest) {
-              try {
-                loadedResults.forEach((loadedResult) => {
-                  this.testRailApi.addAttachmentToResult(caseResults, loadedResult['id']);
-                  TestRailCache.store('caseId', caseIds);
-                })
-              } catch (err) {
-                console.log('Error on adding attachments for loaded results', err)
-              }
-            } else {
-              this.testRailApi.attempt = 1;
-            }
-          }
-        })
-      });
+      this.testRailApi.publishResults(caseResults).then(publishedResults => {
+        if (
+          this.reporterOptions.allowFailedScreenshotUpload === true &&
+          (status === Status.Failed || status === Status.Retest)
+        ) {
+          publishedResults.forEach((result) => {
+            this.testRailApi.uploadScreenshots(caseIds[0], result.id);
+          })
+        }
+      })
     }
   }
 }

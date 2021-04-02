@@ -1,4 +1,12 @@
 "use strict";
+var __assign = (this && this.__assign) || Object.assign || function(t) {
+    for (var s, i = 1, n = arguments.length; i < n; i++) {
+        s = arguments[i];
+        for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+            t[p] = s[p];
+    }
+    return t;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -36,9 +44,9 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var axios = require('axios');
-var find = require('find');
-var request = require('request');
 var fs = require('fs');
+var path = require('path');
+var FormData = require('form-data');
 var TestRailLogger = require('./testrail.logger');
 var TestRailCache = require('./testrail.cache');
 var TestRail = /** @class */ (function () {
@@ -48,7 +56,6 @@ var TestRail = /** @class */ (function () {
         this.caseIds = [];
         this.base = options.host + "/index.php?/api/v2";
         this.runId;
-        this.attempt = 1;
     }
     TestRail.prototype.getCases = function () {
         var url = this.base + "/get_cases/" + this.options.projectId + "&suite_id=" + this.options.suiteId;
@@ -143,66 +150,39 @@ var TestRail = /** @class */ (function () {
             return console.error(error);
         });
     };
-    // This is an API call to the TestRail with proper attachment
-    TestRail.prototype.loadAttachment = function (resultId, attachment) {
-        var options = {
-            method: "POST",
+    TestRail.prototype.uploadAttachment = function (resultId, path) {
+        var form = new FormData();
+        form.append('attachment', fs.createReadStream(path));
+        return axios({
+            method: 'post',
             url: this.base + "/add_attachment_to_result/" + resultId,
-            headers: {
-                "Content-Type": "multipart/form-data"
-            },
+            headers: __assign({}, form.getHeaders()),
             auth: {
                 username: this.options.username,
                 password: this.options.password,
             },
-            formData: {
-                "attachment": fs.createReadStream("./" + attachment)
-            }
-        };
-        request(options, function (err) {
-            if (err)
-                console.log(err);
+            data: form,
         });
     };
     // This function will attach failed screenshot on each test result(comment) if founds it
-    TestRail.prototype.addAttachmentToResult = function (results, loadedResultId) {
+    TestRail.prototype.uploadScreenshots = function (caseId, resultId) {
         var _this = this;
-        var caseId = results[0].case_id;
-        var storedCaseId = TestRailCache.retrieve('caseId');
-        /**
-         * This will ensure that we reset number of retries to the starting value
-         * when execution of current case is done, so that we can upload screenshots
-         * which are related to the current test execution
-        */
-        if (caseId != storedCaseId) {
-            this.attempt = 1;
-        }
-        /**
-         * Based on those two regex we are searching for failed screenshot
-         * If retry cypress feature is enabled it will search for each
-         * failed attempt and upload to corresponding test result (instead aggregating under the same result comment)
-         */
-        var regex1 = new RegExp(/(\W|^)failed(\W|^).png/g);
-        var regex2 = new RegExp('attempt ' + this.attempt, 'g');
-        try {
-            find.file('./cypress/screenshots/', function (files) {
-                files.filter(function (file) { return file.includes("C" + caseId); }).forEach(function (screenshot) {
-                    switch (true) {
-                        case (regex1.test(screenshot) && _this.attempt == 1):
-                            _this.loadAttachment(loadedResultId, screenshot);
-                            _this.attempt++;
-                            break;
-                        case (regex2.test(screenshot)):
-                            _this.loadAttachment(loadedResultId, screenshot);
-                            _this.attempt++;
-                            break;
+        var SCREENSHOTS_FOLDER_PATH = path.join(__dirname, 'cypress/screenshots');
+        fs.readdir(SCREENSHOTS_FOLDER_PATH, function (err, files) {
+            if (err) {
+                return console.log('Unable to scan screenshots folder: ' + err);
+            }
+            files.forEach(function (file) {
+                if (file.includes("C" + caseId) && /(failed|attempt)/g.test(file)) {
+                    try {
+                        _this.uploadAttachment(resultId, SCREENSHOTS_FOLDER_PATH + file);
                     }
-                });
+                    catch (err) {
+                        console.log('Screenshot upload error: ', err);
+                    }
+                }
             });
-        }
-        catch (err) {
-            console.log('Error on adding screenshots. There is no screenshots or something else went wrong.', err);
-        }
+        });
     };
     ;
     TestRail.prototype.closeRun = function () {

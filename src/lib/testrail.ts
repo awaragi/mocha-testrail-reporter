@@ -1,7 +1,7 @@
 const axios = require('axios');
-const find = require('find');
-const request = require('request');
 const fs = require('fs');
+const path = require('path');
+const FormData = require('form-data');
 const TestRailLogger = require('./testrail.logger');
 const TestRailCache = require('./testrail.cache');
 import { TestRailOptions, TestRailResult } from './testrail.interface';
@@ -11,13 +11,11 @@ export class TestRail {
   private runId: Number;
   private includeAll: Boolean = true;
   private caseIds: Number[] = [];
-  public attempt: number;
   private retries: number;
 
   constructor(private options: TestRailOptions) {
     this.base = `${options.host}/index.php?/api/v2`;
     this.runId;
-    this.attempt = 1;
   }
 
   public getCases () {
@@ -103,65 +101,41 @@ export class TestRail {
     });
   }
 
-  // This is an API call to the TestRail with proper attachment
-  public loadAttachment (resultId, attachment) {
-    const options = {
-      method: "POST",
-      url: this.base + "/add_attachment_to_result/" + resultId,
-      headers: {
-          "Content-Type": "multipart/form-data"
-      },
-      auth: {
-          username: this.options.username,
-          password: this.options.password,
-      },
-      formData: {
-          "attachment": fs.createReadStream(`./${attachment}`)
-      }
-    };
+  public uploadAttachment (resultId, path) {
+    const form = new FormData();
+    form.append('attachment', fs.createReadStream(path));
 
-    request(options, function (err) {
-      if (err) console.log(err);
+    return axios({
+      method: 'post',
+      url: `${this.base}/add_attachment_to_result/${resultId}`,
+      headers: { ...form.getHeaders() },
+      auth: {
+        username: this.options.username,
+        password: this.options.password,
+      },
+      data: form,
     })
   }
 
   // This function will attach failed screenshot on each test result(comment) if founds it
-  public addAttachmentToResult (results, loadedResultId) {
-    const caseId = results[0].case_id;
-    const storedCaseId = TestRailCache.retrieve('caseId');
-    /**
-     * This will ensure that we reset number of retries to the starting value
-     * when execution of current case is done, so that we can upload screenshots 
-     * which are related to the current test execution
-    */
-    if (caseId != storedCaseId) {
-      this.attempt = 1;
-    }
-    /**
-     * Based on those two regex we are searching for failed screenshot
-     * If retry cypress feature is enabled it will search for each
-     * failed attempt and upload to corresponding test result (instead aggregating under the same result comment)
-     */
-    const regex1 = new RegExp(/(\W|^)failed(\W|^).png/g);
-    const regex2 = new RegExp('attempt ' + this.attempt, 'g');
-    try {
-      find.file('./cypress/screenshots/', (files) => {
-        files.filter(file => file.includes(`C${caseId}`)).forEach(screenshot => {
-          switch(true) {
-            case (regex1.test(screenshot) && this.attempt == 1):
-              this.loadAttachment(loadedResultId, screenshot);
-              this.attempt++
-              break;
-            case (regex2.test(screenshot)):
-              this.loadAttachment(loadedResultId, screenshot);
-              this.attempt++
-              break;
+  public uploadScreenshots (caseId, resultId) {
+    const SCREENSHOTS_FOLDER_PATH = path.join(__dirname, 'cypress/screenshots');
+
+    fs.readdir(SCREENSHOTS_FOLDER_PATH, (err, files) => {
+      if (err) {
+        return console.log('Unable to scan screenshots folder: ' + err);
+      } 
+
+      files.forEach(file => {
+        if (file.includes(`C${caseId}`) && /(failed|attempt)/g.test(file)) {
+          try {
+            this.uploadAttachment(resultId, SCREENSHOTS_FOLDER_PATH + file)
+          } catch (err) {
+            console.log('Screenshot upload error: ', err)
           }
-        })
+        }
       });
-    } catch (err) {
-      console.log('Error on adding screenshots. There is no screenshots or something else went wrong.', err)
-    }
+    });
   };
 
   public closeRun() {
