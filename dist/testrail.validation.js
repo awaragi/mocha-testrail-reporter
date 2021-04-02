@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+var glob = require('glob');
 var TestRailLogger = require('./testrail.logger');
 var TestRailValidation = /** @class */ (function () {
     function TestRailValidation(options) {
@@ -69,7 +70,6 @@ var TestRailValidation = /** @class */ (function () {
      * and based on that we will wait until last one is executed to close active test run in TestRail
      */
     TestRailValidation.prototype.countTestSpecFiles = function () {
-        var glob = require('glob');
         // Read and store cli arguments into array
         var cliArgs = process.argv.slice(2);
         /**
