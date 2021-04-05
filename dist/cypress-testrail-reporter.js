@@ -27,6 +27,9 @@ var CypressTestRailReporter = /** @class */ (function (_super) {
         _this.results = [];
         _this.suiteId = [];
         _this.reporterOptions = options.reporterOptions;
+        if (process.env.CYPRESS_TESTRAIL_REPORTER_USERNAME) {
+            _this.reporterOptions.username = process.env.CYPRESS_TESTRAIL_REPORTER_USERNAME;
+        }
         if (process.env.CYPRESS_TESTRAIL_REPORTER_PASSWORD) {
             _this.reporterOptions.password = process.env.CYPRESS_TESTRAIL_REPORTER_PASSWORD;
         }
@@ -122,7 +125,7 @@ var CypressTestRailReporter = /** @class */ (function (_super) {
                 else {
                     _this.runId = TestRailCache.retrieve('runId');
                     var path = "runs/view/" + _this.runId;
-                    TestRailLogger.log("Results are published to " + chalk.magenta("https://" + _this.reporterOptions.host + "/index.php?/" + path));
+                    TestRailLogger.log("Results are published to " + chalk.magenta(_this.reporterOptions.host + "/index.php?/" + path));
                 }
             });
         }
@@ -137,6 +140,11 @@ var CypressTestRailReporter = /** @class */ (function (_super) {
     CypressTestRailReporter.prototype.submitResults = function (status, test, comment) {
         var _this = this;
         var caseIds = shared_1.titleToCaseIds(test.title);
+        var serverTestCaseIds = this.testRailApi.getCases();
+        var invalidCaseIds = caseIds.filter(function (caseId) { return !serverTestCaseIds.includes(caseId); });
+        caseIds = caseIds.filter(function (caseId) { return serverTestCaseIds.includes(caseId); });
+        if (invalidCaseIds.length > 0)
+            TestRailLogger.log("The following test IDs were found in Cypress tests, but not found in Testrail: " + invalidCaseIds);
         if (caseIds.length) {
             var caseResults = caseIds.map(function (caseId) {
                 return {
@@ -146,14 +154,14 @@ var CypressTestRailReporter = /** @class */ (function (_super) {
                 };
             });
             (_a = this.results).push.apply(_a, caseResults);
-            this.testRailApi.publishResults(caseResults).then(function (publishedResults) {
-                if (_this.reporterOptions.allowFailedScreenshotUpload === true &&
-                    (status === testrail_interface_1.Status.Failed || status === testrail_interface_1.Status.Retest)) {
-                    publishedResults.forEach(function (result) {
-                        _this.testRailApi.uploadScreenshots(caseIds[0], result.id);
-                    });
-                }
-            });
+            var publishedResults = this.testRailApi.publishResults(caseResults);
+            if (publishedResults !== undefined &&
+                this.reporterOptions.allowFailedScreenshotUpload === true &&
+                (status === testrail_interface_1.Status.Failed || status === testrail_interface_1.Status.Retest)) {
+                publishedResults.forEach(function (result) {
+                    _this.testRailApi.uploadScreenshots(caseIds[0], result.id);
+                });
+            }
         }
         var _a;
     };

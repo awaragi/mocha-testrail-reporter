@@ -22,6 +22,10 @@ export class CypressTestRailReporter extends reporters.Spec {
 
     this.reporterOptions = options.reporterOptions;
 
+    if (process.env.CYPRESS_TESTRAIL_REPORTER_USERNAME) {
+      this.reporterOptions.username = process.env.CYPRESS_TESTRAIL_REPORTER_USERNAME;
+    }
+
     if (process.env.CYPRESS_TESTRAIL_REPORTER_PASSWORD) {
       this.reporterOptions.password = process.env.CYPRESS_TESTRAIL_REPORTER_PASSWORD;
     }
@@ -121,7 +125,7 @@ export class CypressTestRailReporter extends reporters.Spec {
         } else {
           this.runId = TestRailCache.retrieve('runId');
           var path = `runs/view/${this.runId}`;
-          TestRailLogger.log(`Results are published to ${chalk.magenta(`https://${this.reporterOptions.host}/index.php?/${path}`)}`);
+          TestRailLogger.log(`Results are published to ${chalk.magenta(`${this.reporterOptions.host}/index.php?/${path}`)}`);
         }
       });
     }
@@ -134,7 +138,13 @@ export class CypressTestRailReporter extends reporters.Spec {
    * Note: Uploading of screenshot is configurable option
    */
   public submitResults (status, test, comment) {
-    const caseIds = titleToCaseIds(test.title);
+    let caseIds = titleToCaseIds(test.title)
+    const serverTestCaseIds = this.testRailApi.getCases()
+    const invalidCaseIds = caseIds.filter(caseId => !serverTestCaseIds.includes(caseId));
+    caseIds = caseIds.filter(caseId => serverTestCaseIds.includes(caseId))
+    if (invalidCaseIds.length > 0)
+      TestRailLogger.log(`The following test IDs were found in Cypress tests, but not found in Testrail: ${invalidCaseIds}`)
+
     if (caseIds.length) {
       const caseResults = caseIds.map(caseId => {
         return {
@@ -144,16 +154,16 @@ export class CypressTestRailReporter extends reporters.Spec {
         };
       });
       this.results.push(...caseResults);
-      this.testRailApi.publishResults(caseResults).then(publishedResults => {
-        if (
-          this.reporterOptions.allowFailedScreenshotUpload === true &&
-          (status === Status.Failed || status === Status.Retest)
-        ) {
-          publishedResults.forEach((result) => {
-            this.testRailApi.uploadScreenshots(caseIds[0], result.id);
-          })
-        }
-      })
+      const publishedResults = this.testRailApi.publishResults(caseResults)
+      if (
+        publishedResults !== undefined &&
+        this.reporterOptions.allowFailedScreenshotUpload === true &&
+        (status === Status.Failed || status === Status.Retest)
+      ) {
+        publishedResults.forEach((result) => {
+          this.testRailApi.uploadScreenshots(caseIds[0], result.id);
+        })
+      }
     }
   }
 }

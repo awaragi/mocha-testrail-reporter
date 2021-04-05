@@ -1,4 +1,5 @@
 import { TestRailOptions } from "./testrail.interface";
+const glob = require('glob');
 const TestRailLogger = require('./testrail.logger');
 
 export class TestRailValidation {
@@ -74,7 +75,6 @@ export class TestRailValidation {
    * and based on that we will wait until last one is executed to close active test run in TestRail
    */
   public countTestSpecFiles () {
-    var glob = require('glob');
     // Read and store cli arguments into array
     const cliArgs = process.argv.slice(2);
     /** 

@@ -1,4 +1,5 @@
 const axios = require('axios');
+const deasync = require('deasync');
 const fs = require('fs');
 const path = require('path');
 const FormData = require('form-data');
@@ -18,6 +19,21 @@ export class TestRail {
     this.runId;
   }
 
+  /**
+   * To work around a Cypress issue where Mocha exits before async requests
+   * finish, we use the deasync library to ensure our axios promises
+   * actually complete. For more information, see:
+   * https://github.com/cypress-io/cypress/issues/7139
+   * @param promise A `finally` condition will be appended to this promise, enabling a deasync loop
+   */
+  private makeSync(promise) {
+    let done = false;
+    let result = undefined;
+    (async() => result = await promise.finally(() => done = true))();
+    deasync.loopWhile(() => !done);
+    return result;
+  }
+
   public getCases () {
     let url = `${this.base}/get_cases/${this.options.projectId}&suite_id=${this.options.suiteId}`
     if (this.options.groupId) {
@@ -26,95 +42,105 @@ export class TestRail {
     if (this.options.filter) {
       url += `&filter=${this.options.filter}`
     }
-    return axios({
-      method:'get',
-      url: url,
-      headers: { 'Content-Type': 'application/json' }, 
-      auth: {
-          username: this.options.username,
-          password: this.options.password
-      } 
-    })
-    .then(response => response.data.map(item =>item.id))
-    .catch(error => console.error(error));
+    return this.makeSync(
+      axios({
+        method:'get',
+        url: url,
+        headers: { 'Content-Type': 'application/json' }, 
+        auth: {
+            username: this.options.username,
+            password: this.options.password
+        } 
+      })
+      .then(response => {
+        return response.data.map(item =>item.id)
+      })
+      .catch(error => console.error(error))
+    )
   }
 
-  public async createRun (name: string, description: string, suiteId: number) {
+  public createRun (name: string, description: string, suiteId: number) {
     if (this.options.includeAllInTestRun === false){
       this.includeAll = false;
-      this.caseIds =  await this.getCases();
-    }  
-    axios({
-      method: 'post',
-      url: `${this.base}/add_run/${this.options.projectId}`,
-      headers: { 'Content-Type': 'application/json' },
-      auth: {
-        username: this.options.username,
-        password: this.options.password,
-      },
-      data: JSON.stringify({
-        suite_id: suiteId,
-        name,
-        description,
-        include_all: this.includeAll,
-        case_ids: this.caseIds
-      }),
-    })
-    .then(response => {
-        this.runId = response.data.id;
-        // cache the TestRail Run ID
-        TestRailCache.store('runId', this.runId);
-    })
-    .catch(error => console.error(error));
+      this.caseIds = this.getCases();
+    }
+    this.makeSync(
+      axios({
+        method: 'post',
+        url: `${this.base}/add_run/${this.options.projectId}`,
+        headers: { 'Content-Type': 'application/json' },
+        auth: {
+          username: this.options.username,
+          password: this.options.password,
+        },
+        data: JSON.stringify({
+          suite_id: suiteId,
+          name,
+          description,
+          include_all: this.includeAll,
+          case_ids: this.caseIds
+        }),
+      })
+      .then(response => {
+          this.runId = response.data.id;
+          // cache the TestRail Run ID
+          TestRailCache.store('runId', this.runId);
+      })
+      .catch(error => console.error(error))
+    );
   }
 
   public deleteRun() {
     this.runId = TestRailCache.retrieve('runId');
-    axios({
-      method: 'post',
-      url: `${this.base}/delete_run/${this.runId}`,
-      headers: { 'Content-Type': 'application/json' },
-      auth: {
-        username: this.options.username,
-        password: this.options.password,
-      },
-    }).catch(error => console.error(error));
+    this.makeSync(
+      axios({
+        method: 'post',
+        url: `${this.base}/delete_run/${this.runId}`,
+        headers: { 'Content-Type': 'application/json' },
+        auth: {
+          username: this.options.username,
+          password: this.options.password,
+        },
+      }).catch(error => console.error(error))
+    )
   }
 
   public publishResults(results: TestRailResult[]) {
     this.runId = TestRailCache.retrieve('runId');
-    return axios({
-      method: 'post',
-      url: `${this.base}/add_results_for_cases/${this.runId}`,
-      headers: { 'Content-Type': 'application/json' },
-      auth: {
-        username: this.options.username,
-        password: this.options.password,
-      },
-      data: JSON.stringify({ results }),
-    })
-    .then(response => {
-      return response.data
-    })
-    .catch(error => { 
-      return console.error(error); 
-    });
+    return this.makeSync(
+      axios({
+        method: 'post',
+        url: `${this.base}/add_results_for_cases/${this.runId}`,
+        headers: { 'Content-Type': 'application/json' },
+        auth: {
+          username: this.options.username,
+          password: this.options.password,
+        },
+        data: JSON.stringify({ results }),
+      })
+      .then(response => response.data)
+      .catch(error => { 
+        console.error(error); 
+      })
+    )
   }
 
   public uploadAttachment (resultId, path) {
     const form = new FormData();
     form.append('attachment', fs.createReadStream(path));
 
-    return axios({
-      method: 'post',
-      url: `${this.base}/add_attachment_to_result/${resultId}`,
-      headers: { ...form.getHeaders() },
-      auth: {
-        username: this.options.username,
-        password: this.options.password,
-      },
-      data: form,
-    })
+    this.makeSync(
+      axios({
+        method: 'post',
+        url: `${this.base}/add_attachment_to_result/${resultId}`,
+        headers: { ...form.getHeaders() },
+        auth: {
+          username: this.options.username,
+          password: this.options.password,
+        },
+        data: form,
+      })
+    )
   }
 
   // This function will attach failed screenshot on each test result(comment) if founds it
@@ -140,18 +166,20 @@ export class TestRail {
 
   public closeRun() {
     this.runId = TestRailCache.retrieve('runId');
-    axios({
-      method: 'post',
-      url: `${this.base}/close_run/${this.runId}`,
-      headers: { 'Content-Type': 'application/json' },
-      auth: {
-        username: this.options.username,
-        password: this.options.password,
-      },
-    })
-    .then(() => {
-        TestRailLogger.log('Test run closed successfully');
-    })
-    .catch(error => console.error(error));
+    this.makeSync(
+      axios({
+        method: 'post',
+        url: `${this.base}/close_run/${this.runId}`,
+        headers: { 'Content-Type': 'application/json' },
+        auth: {
+          username: this.options.username,
+          password: this.options.password,
+        },
+      })
+      .then(() => {
+          TestRailLogger.log('Test run closed successfully');
+      })
+      .catch(error => console.error(error))
+    );
   }
 }
