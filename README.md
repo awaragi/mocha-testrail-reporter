@@ -8,12 +8,12 @@ Publishes [Cypress](https://www.cypress.io/) runs on TestRail.
 
 Core features:
 
-1. Test results are aggregated under the same test run if you are executing more spec(test) files and they are belongs to the same suite
-2. Results are reported immediately after single test execution (real-time reporting)
-3. Test run would be closed after last spec(test) file has been finished
-4. Possibility to upload screenshots for failed and retried test cases - optional (**allowFailedScreenshotUpload: true**)
-5. Multi suite project support (set **suiteId=1** in **cypress.json** or set it as a part of runtime environment variables as **testRailSuiteId=1**)
-6. Reporting retest status of a test cases - handy in terms of marking tests as flaky (test is reported with retest status for the first try and after second try it passes) Note: cypress retry logic must be enabled for this feature.  
+* Test results are aggregated under the same test run if you are executing more spec(test) files and they are belongs to the same suite
+* Results are reported immediately after single test execution (real-time reporting)
+* Test run would be closed after last spec(test) file has been finished
+* Possibility to upload screenshots for failed and retried test cases - optional (**allowFailedScreenshotUpload: true**)
+* Multi suite project support (set **suiteId=1** in **cypress.json** or set it as a part of runtime environment variables as **testRailSuiteId=1**)
+* Reporting retest status of a test cases - handy in terms of marking tests as flaky (test is reported with retest status for the first try and after second try it passes) Note: cypress retry logic must be enabled for this feature.  
 
 
 ## Install
@@ -36,41 +36,6 @@ Add reporter to your `cypress.json`:
   "projectId": 1,
   "suiteId": 1,
 }
-
-"suiteId is optional in this file, in case that you want to set
-  this value through runtime environment variables (command line execution)"
-```
-This reporter can handle multiple suite project in TestRail. In order to use it, don't define **suiteId** under **cypress.json** file and instead you should pass **testRailSuiteId** variable when you define all other CLI agruments for cypress execution(through command line). If you are using CI integration solution (e.g. GitLab) **testRailSuiteId** can be set before every pipeline job or predefined for each spec (test) file for which suiteId belongs to.
-
-**gitlab-ci.yml** file (Here you can pass **suiteId** as a variable):
-
-```Javascript
-
-e2e_test1:
-  script: 
-    - e2e-setup.sh
-  variables:
-    CYPRESS_SPEC: "cypress/integration/dashboard/*"
-    TESTRAIL_SUITEID: 1
-
-e2e_test2:
-  script: 
-    - e2e-setup.sh
-  variables:
-    CYPRESS_SPEC: "cypress/integration/login/*"
-    TESTRAIL_SUITEID: 2
-```
-
-and use it later during cypress run:
-
-**e2e-setup.sh** file
-
-```Javascript
-
-CYPRESS_OPTIONS="baseUrl=${url},trashAssetsBeforeRuns=false,video=${video},screenshotOnRunFailure=${screenshotOnRunFailure}"
-CYPRESS_ENV="testRailSuiteId=${TESTRAIL_SUITEID}"
-
-npx cypress run --headed --browser chrome --config "${CYPRESS_OPTIONS}" --env="${CYPRESS_ENV}" --spec "${CYPRESS_SPEC}"
 ```
 
 Your Cypress tests should include the ID of your TestRail test case. Make sure your test case IDs are distinct from your test titles:
@@ -110,6 +75,41 @@ environment variables, this option would be overwritten with it.
 
 **filter**: _string_ (optional: needs "includeAllInTestRun": false) Only return cases with matching filter string in the case title
 
+## Multiple suite
+
+This reporter can handle multiple suite project in TestRail. In order to use it, don't define **suiteId** under **cypress.json** file and instead you should pass **testRailSuiteId** variable when you define all other CLI agruments for cypress execution(through command line). If you are using CI integration solution (e.g. GitLab) **testRailSuiteId** can be set before every pipeline job or predefined for each spec (test) file for which suiteId belongs to.
+
+**gitlab-ci.yml** file (Here you can pass **suiteId** as a variable):
+
+```Javascript
+
+e2e_test1:
+  script: 
+    - e2e-setup.sh
+  variables:
+    CYPRESS_SPEC: "cypress/integration/dashboard/*"
+    TESTRAIL_SUITEID: 1
+
+e2e_test2:
+  script: 
+    - e2e-setup.sh
+  variables:
+    CYPRESS_SPEC: "cypress/integration/login/*"
+    TESTRAIL_SUITEID: 2
+```
+
+and use it later during cypress run:
+
+**e2e-setup.sh** file
+
+```Javascript
+
+CYPRESS_OPTIONS="baseUrl=${url},trashAssetsBeforeRuns=false,video=${video},screenshotOnRunFailure=${screenshotOnRunFailure}"
+CYPRESS_ENV="testRailSuiteId=${TESTRAIL_SUITEID}"
+
+npx cypress run --headed --browser chrome --config "${CYPRESS_OPTIONS}" --env="${CYPRESS_ENV}" --spec "${CYPRESS_SPEC}"
+```
+
 ## TestRail Settings
 
 To increase security, the TestRail team suggests using an API key instead of a password. You can see how to generate an API key [here](http://docs.gurock.com/testrail-api2/accessing#username_and_api_key).
@@ -123,6 +123,11 @@ You can read the whole TestRail documentation [here](http://docs.gurock.com/).
 ## Author
 
 Milutin Savovic - [github](https://github.com/mickosav)
+
+## Core contributors
+
+* [Anes Topcic](https://github.com/sakalaca)
+* [FFdhorkin](https://github.com/FFdhorkin)
 
 ## License
 
