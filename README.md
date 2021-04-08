@@ -110,6 +110,17 @@ CYPRESS_ENV="testRailSuiteId=${TESTRAIL_SUITEID}"
 npx cypress run --headed --browser chrome --config "${CYPRESS_OPTIONS}" --env="${CYPRESS_ENV}" --spec "${CYPRESS_SPEC}"
 ```
 
+## Cucumber preprocessor
+
+This reporter can miss spec files if they are suffixed as **.feature** or if you are not using the default **cypress/integration** folder. In order to use it with the Cucumber Preprocess, you should pass the location of your spec files **cypress/tests/\*\*/\*.feature** when you define all other CLI agruments for cypress execution(through command line). If you are using CI integration solution (e.g. GitLab) **CYPRESS_SPEC** can be set before every pipeline job
+
+```Javascript
+
+CYPRESS_SPEC="cypress/tests/**/*.feature"
+
+npx cypress run --headed --browser chrome --spec "${CYPRESS_SPEC}"
+```
+
 ## TestRail Settings
 
 To increase security, the TestRail team suggests using an API key instead of a password. You can see how to generate an API key [here](http://docs.gurock.com/testrail-api2/accessing#username_and_api_key).
