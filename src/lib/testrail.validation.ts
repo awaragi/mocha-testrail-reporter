@@ -76,27 +76,31 @@ export class TestRailValidation {
    */
   public countTestSpecFiles () {
     // Read and store cli arguments into array
-    const cliArgs = process.argv.slice(2);
-    /** 
-     * Count how many test files will be included in the run 
+    var cliArgs = process.argv.slice(2);
+    /**
+     * Count how many test files will be included in the run
      * to be able to close test run after last one
-    */
+     */
     var index, value, result, directory;
     var workingDirectory = [];
     var specFiles = [];
     var specFilesArray = [];
     for (index = 0; index < cliArgs.length; ++index) {
       value = cliArgs[index];
-      if (value.includes('cypress/integration') === true) {
+      if (
+        value.includes("cypress/integration") === true ||
+        value.includes("cypress/tests") === true
+      ) {
         result = value;
         break;
       }
     }
+
     const specArg = result.split(/,/);
     for (index = 0; index < specArg.length; ++index) {
       value = specArg[index];
       result = value.replace(/(?:\.(?![^.]+$)|[^\w])+/g, "/");
-      directory = result.replace(/\b(js|ts)\b/, '');
+      directory = result.replace(/\b(js|ts|feature)\b/, '');
       workingDirectory.push(directory);
     }
         

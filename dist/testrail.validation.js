@@ -75,23 +75,26 @@ var TestRailValidation = /** @class */ (function () {
         /**
          * Count how many test files will be included in the run
          * to be able to close test run after last one
-        */
+         */
+        console.log("cliArgs: " + cliArgs);
         var index, value, result, directory;
         var workingDirectory = [];
         var specFiles = [];
         var specFilesArray = [];
         for (index = 0; index < cliArgs.length; ++index) {
             value = cliArgs[index];
-            if (value.includes('cypress/integration') === true) {
+            if (value.includes("cypress/integration") === true ||
+                value.includes("cypress/tests") === true) {
                 result = value;
                 break;
             }
         }
+        console.log("result:" + result);
         var specArg = result.split(/,/);
         for (index = 0; index < specArg.length; ++index) {
             value = specArg[index];
             result = value.replace(/(?:\.(?![^.]+$)|[^\w])+/g, "/");
-            directory = result.replace(/\b(js|ts)\b/, '');
+            directory = result.replace(/\b(js|ts|feature)\b/, '');
             workingDirectory.push(directory);
         }
         for (index = 0; index < workingDirectory.length; ++index) {
