@@ -33,6 +33,9 @@ var CypressTestRailReporter = /** @class */ (function (_super) {
         if (process.env.CYPRESS_TESTRAIL_REPORTER_PASSWORD) {
             _this.reporterOptions.password = process.env.CYPRESS_TESTRAIL_REPORTER_PASSWORD;
         }
+        if (process.env.CYPRESS_TESTRAIL_REPORTER_RUNNAME) {
+            _this.reporterOptions.runName = process.env.CYPRESS_TESTRAIL_REPORTER_RUNNAME;
+        }
         _this.testRailApi = new testrail_1.TestRail(_this.reporterOptions);
         _this.testRailValidation = new testrail_validation_1.TestRailValidation(_this.reporterOptions);
         /**

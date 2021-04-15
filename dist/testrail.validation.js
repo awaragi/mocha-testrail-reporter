@@ -76,7 +76,6 @@ var TestRailValidation = /** @class */ (function () {
          * Count how many test files will be included in the run
          * to be able to close test run after last one
          */
-        console.log("cliArgs: " + cliArgs);
         var index, value, result, directory;
         var workingDirectory = [];
         var specFiles = [];
@@ -89,7 +88,6 @@ var TestRailValidation = /** @class */ (function () {
                 break;
             }
         }
-        console.log("result:" + result);
         var specArg = result.split(/,/);
         for (index = 0; index < specArg.length; ++index) {
             value = specArg[index];

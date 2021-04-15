@@ -63,7 +63,7 @@ environment variables, this option would be overwritten with it.
 
 **suiteId**: _number_ suite with which the tests are associated. Optional under **cypress.json** file in case that you define **suiteId** under **gitlab-ci.yml** file or set this value in runtime environment varables.
 
-**runName**: _string_ (optional) name of the Testrail run.
+**runName**: _string_ (optional) name of the Testrail run. When you set `CYPRESS_TESTRAIL_REPORTER_RUNNAME` in runtime environment variables, this option would be overwritten with it.
 
 **disableDescription**: _bool_ (optional: default is false) possibility to disable description for test run in case that someone don’t have cypress dashboard feature (_disableDescription: true_)
 
