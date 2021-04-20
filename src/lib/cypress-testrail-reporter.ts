@@ -111,6 +111,9 @@ export class CypressTestRailReporter extends reporters.Spec {
          */
         var numSpecFiles = this.testRailValidation.countTestSpecFiles();
         var counter = TestRailCache.retrieve('runCounter');
+        // load runId before purging testrail-cache.txt
+        this.runId = TestRailCache.retrieve('runId');
+
         if (numSpecFiles.length > counter) {
           runCounter++
         } else {
@@ -127,7 +130,6 @@ export class CypressTestRailReporter extends reporters.Spec {
         if (this.results.length == 0) {
           TestRailLogger.warn('No testcases were matched with TestRail. Ensure that your tests are declared correctly and titles contain matches to format of Cxxxx');
         } else {
-          this.runId = TestRailCache.retrieve('runId');
           var path = `runs/view/${this.runId}`;
           TestRailLogger.log(`Results are published to ${chalk.magenta(`${this.reporterOptions.host}/index.php?/${path}`)}`);
         }
