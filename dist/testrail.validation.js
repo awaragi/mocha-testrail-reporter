@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.TestRailValidation = void 0;
 var glob = require('glob');
 var TestRailLogger = require('./testrail.logger');
 var TestRailValidation = /** @class */ (function () {

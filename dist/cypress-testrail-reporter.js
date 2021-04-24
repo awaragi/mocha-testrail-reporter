@@ -1,15 +1,21 @@
 "use strict";
 var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
     return function (d, b) {
+        if (typeof b !== "function" && b !== null)
+            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
         extendStatics(d, b);
         function __() { this.constructor = d; }
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.CypressTestRailReporter = void 0;
 var mocha_1 = require("mocha");
 var moment = require("moment");
 var testrail_1 = require("./testrail");
@@ -109,6 +115,8 @@ var CypressTestRailReporter = /** @class */ (function (_super) {
                  */
                 var numSpecFiles = _this.testRailValidation.countTestSpecFiles();
                 var counter = TestRailCache.retrieve('runCounter');
+                // load runId before purging testrail-cache.txt
+                _this.runId = TestRailCache.retrieve('runId');
                 if (numSpecFiles.length > counter) {
                     runCounter++;
                 }
@@ -126,7 +134,6 @@ var CypressTestRailReporter = /** @class */ (function (_super) {
                     TestRailLogger.warn('No testcases were matched with TestRail. Ensure that your tests are declared correctly and titles contain matches to format of Cxxxx');
                 }
                 else {
-                    _this.runId = TestRailCache.retrieve('runId');
                     var path = "runs/view/" + _this.runId;
                     TestRailLogger.log("Results are published to " + chalk.magenta(_this.reporterOptions.host + "/index.php?/" + path));
                 }
@@ -141,6 +148,7 @@ var CypressTestRailReporter = /** @class */ (function (_super) {
      * Note: Uploading of screenshot is configurable option
      */
     CypressTestRailReporter.prototype.submitResults = function (status, test, comment) {
+        var _a;
         var _this = this;
         var caseIds = shared_1.titleToCaseIds(test.title);
         var serverTestCaseIds = this.testRailApi.getCases();
@@ -166,7 +174,6 @@ var CypressTestRailReporter = /** @class */ (function (_super) {
                 });
             }
         }
-        var _a;
     };
     return CypressTestRailReporter;
 }(mocha_1.reporters.Spec));
