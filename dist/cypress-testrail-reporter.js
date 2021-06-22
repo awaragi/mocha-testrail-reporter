@@ -151,7 +151,7 @@ var CypressTestRailReporter = /** @class */ (function (_super) {
         var _a;
         var _this = this;
         var caseIds = shared_1.titleToCaseIds(test.title);
-        var serverTestCaseIds = this.testRailApi.getCases();
+        var serverTestCaseIds = this.testRailApi.getCases(this.suiteId);
         var invalidCaseIds = caseIds.filter(function (caseId) { return !serverTestCaseIds.includes(caseId); });
         caseIds = caseIds.filter(function (caseId) { return serverTestCaseIds.includes(caseId); });
         if (invalidCaseIds.length > 0)

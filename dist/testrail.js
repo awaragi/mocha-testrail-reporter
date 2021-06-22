@@ -83,8 +83,8 @@ var TestRail = /** @class */ (function () {
         deasync.loopWhile(function () { return !done; });
         return result;
     };
-    TestRail.prototype.getCases = function () {
-        var url = this.base + "/get_cases/" + this.options.projectId + "&suite_id=" + this.options.suiteId;
+    TestRail.prototype.getCases = function (suiteId) {
+        var url = this.base + "/get_cases/" + this.options.projectId + "&suite_id=" + suiteId;
         if (this.options.groupId) {
             url += "&section_id=" + this.options.groupId;
         }
@@ -109,7 +109,7 @@ var TestRail = /** @class */ (function () {
         var _this = this;
         if (this.options.includeAllInTestRun === false) {
             this.includeAll = false;
-            this.caseIds = this.getCases();
+            this.caseIds = this.getCases(suiteId);
         }
         this.makeSync(axios({
             method: 'post',
