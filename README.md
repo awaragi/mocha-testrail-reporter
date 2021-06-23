@@ -71,7 +71,7 @@ environment variables, this option would be overwritten with it.
 
 **includeAllInTestRun**: _bool_ (optional: default is true) will return all test cases in test run. set to false to return test runs based on filter or section/group.
 
-**groupId**: _string_ (optional: needs "includeAllInTestRun": false ) The ID of the section/group
+**groupId**: _string_ (optional: needs "includeAllInTestRun": false ) The ID of the section/group. When you set `CYPRESS_TESTRAIL_REPORTER_GROUPID` in runtime environment variables, this option would be overwritten with it.
 
 **filter**: _string_ (optional: needs "includeAllInTestRun": false) Only return cases with matching filter string in the case title
 
