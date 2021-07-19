@@ -91,7 +91,12 @@ var CypressTestRailReporter = /** @class */ (function (_super) {
                         var description = '';
                     }
                     else {
-                        var description = 'For the Cypress run visit https://dashboard.cypress.io/#/projects/runs';
+                        if (process.env.CYPRESS_CI_JOB_URL) {
+                            var description = process.env.CYPRESS_CI_JOB_URL;
+                        }
+                        else {
+                            var description = 'For the Cypress run visit https://dashboard.cypress.io/#/projects/runs';
+                        }
                     }
                     TestRailLogger.log("Creating TestRail Run with name: " + name_1);
                     _this.testRailApi.createRun(name_1, description, _this.suiteId);
