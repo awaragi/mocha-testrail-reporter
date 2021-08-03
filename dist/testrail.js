@@ -91,6 +91,9 @@ var TestRail = /** @class */ (function () {
         if (this.options.filter) {
             url += "&filter=" + this.options.filter;
         }
+        if (this.options.typeId) {
+            url += "&type_id=" + this.options.typeId;
+        }
         return this.makeSync(axios({
             method: 'get',
             url: url,
