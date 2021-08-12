@@ -16,6 +16,7 @@ export class CypressTestRailReporter extends reporters.Spec {
   private runId: number;
   private reporterOptions: any;
   private suiteId: any = [];
+  private serverTestCaseIds: any = [];
 
   constructor(runner: any, options: any) {
     super(runner);
@@ -66,6 +67,7 @@ export class CypressTestRailReporter extends reporters.Spec {
      */
     if (this.suiteId && this.suiteId.toString().length) {
       runner.on('start', () => {
+        this.serverTestCaseIds = this.testRailApi.getCases(this.suiteId);
         /**
         * runCounter is used to count how many spec files we have during one run
         * in order to wait for close test run function
@@ -153,9 +155,8 @@ export class CypressTestRailReporter extends reporters.Spec {
    */
   public submitResults (status, test, comment) {
     let caseIds = titleToCaseIds(test.title)
-    const serverTestCaseIds = this.testRailApi.getCases(this.suiteId)
-    const invalidCaseIds = caseIds.filter(caseId => !serverTestCaseIds.includes(caseId));
-    caseIds = caseIds.filter(caseId => serverTestCaseIds.includes(caseId))
+    const invalidCaseIds = caseIds.filter(caseId => !this.serverTestCaseIds.includes(caseId));
+    caseIds = caseIds.filter(caseId => this.serverTestCaseIds.includes(caseId))
     if (invalidCaseIds.length > 0)
       TestRailLogger.log(`The following test IDs were found in Cypress tests, but not found in Testrail: ${invalidCaseIds}`)
 
