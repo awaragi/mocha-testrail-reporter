@@ -32,6 +32,7 @@ var CypressTestRailReporter = /** @class */ (function (_super) {
         var _this = _super.call(this, runner) || this;
         _this.results = [];
         _this.suiteId = [];
+        _this.serverTestCaseIds = [];
         _this.reporterOptions = options.reporterOptions;
         if (process.env.CYPRESS_TESTRAIL_REPORTER_USERNAME) {
             _this.reporterOptions.username = process.env.CYPRESS_TESTRAIL_REPORTER_USERNAME;
@@ -71,6 +72,7 @@ var CypressTestRailReporter = /** @class */ (function (_super) {
          */
         if (_this.suiteId && _this.suiteId.toString().length) {
             runner.on('start', function () {
+                _this.serverTestCaseIds = _this.testRailApi.getCases(_this.suiteId);
                 /**
                 * runCounter is used to count how many spec files we have during one run
                 * in order to wait for close test run function
@@ -159,9 +161,8 @@ var CypressTestRailReporter = /** @class */ (function (_super) {
         var _a;
         var _this = this;
         var caseIds = shared_1.titleToCaseIds(test.title);
-        var serverTestCaseIds = this.testRailApi.getCases(this.suiteId);
-        var invalidCaseIds = caseIds.filter(function (caseId) { return !serverTestCaseIds.includes(caseId); });
-        caseIds = caseIds.filter(function (caseId) { return serverTestCaseIds.includes(caseId); });
+        var invalidCaseIds = caseIds.filter(function (caseId) { return !_this.serverTestCaseIds.includes(caseId); });
+        caseIds = caseIds.filter(function (caseId) { return _this.serverTestCaseIds.includes(caseId); });
         if (invalidCaseIds.length > 0)
             TestRailLogger.log("The following test IDs were found in Cypress tests, but not found in Testrail: " + invalidCaseIds);
         if (caseIds.length) {
