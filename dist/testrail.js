@@ -104,7 +104,7 @@ var TestRail = /** @class */ (function () {
             }
         })
             .then(function (response) {
-            return response.data.map(function (item) { return item.id; });
+            return response.data.cases.map(function (item) { return item.id; });
         })
             .catch(function (error) { return console.error(error); }));
     };
