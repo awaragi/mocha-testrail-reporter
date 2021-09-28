@@ -56,7 +56,7 @@ export class TestRail {
         } 
       })
       .then(response => {
-        return response.data.map(item =>item.id)
+        return response.data.cases.map(item =>item.id)
       })
       .catch(error => console.error(error))
     )
