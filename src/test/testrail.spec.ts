@@ -30,6 +30,6 @@ describe("TestRail API", () => {
             case_id: 3,
             status_id: Status.Failed,
             comment: "Failure...."
-        }], done);
+        }], () => { done(); });
     });
 });
