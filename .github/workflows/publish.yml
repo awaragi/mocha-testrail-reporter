@@ -17,12 +17,13 @@ jobs:
       - run: yarn
       - run: yarn build
       - run: yarn test
-      - run: yarn publish
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           DOMAIN: ${{ secrets.DOMAIN }}
           USERNAME: ${{ secrets.USERNAME }}
           PASSWORD: ${{ secrets.PASSWORD }}
           PROJECTID: 1
           SUITEID: 1
           ASSIGNEDTOID: 1
+      - run: yarn publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
