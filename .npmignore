@@ -1,6 +1,12 @@
-*.iml
+.github
 .idea/
-tsconfig.json
 src/
 dist/test
+*.iml
+tsconfig.json
 *.map
+*.lock
+package-lock.json
+.prettier*
+.env
+*.tgz
