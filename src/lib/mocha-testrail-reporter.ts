@@ -1,7 +1,7 @@
 import {reporters} from 'mocha';
 import {TestRail} from "./testrail";
 import {titleToCaseIds} from "./shared";
-import {Status, TestRailResult} from "./testrail.interface";
+import {Status, TestRailOptions, TestRailResult} from "./testrail.interface";
 
 
 export class MochaTestRailReporter extends reporters.Spec {
@@ -15,16 +15,15 @@ export class MochaTestRailReporter extends reporters.Spec {
         super(runner);
 
         let reporterOptions: TestRailOptions = <TestRailOptions>options.reporterOptions;
-        this.validate(reporterOptions, 'domain');
-        this.validate(reporterOptions, 'username');
-        this.validate(reporterOptions, 'password');
-        this.validate(reporterOptions, 'projectId');
-        this.validate(reporterOptions, 'suiteId');
+        
+        // validate options
+        ['domain', 'username', 'password', 'projectId', 'suiteId']
+            .forEach(option => MochaTestRailReporter.validate(reporterOptions, option))
 
         runner.on('start', () => {
         });
 
-        runner.on('suite', (suite) => {
+        runner.on('suite', () => {
         });
 
         runner.on('suite end', () => {
@@ -100,7 +99,7 @@ ${this.out.join('\n')}
         });
     }
 
-    private validate(options: TestRailOptions, name: string) {
+    private static validate(options: TestRailOptions, name: string) {
         if (options == null) {
             throw new Error("Missing --reporter-options in mocha.opts");
         }

@@ -5,3 +5,4 @@ node-debug*
 .idea/
 npm-debug.log
 dist
+/.env

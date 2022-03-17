@@ -8,12 +8,19 @@ export class TestRail {
     private base: String;
 
     constructor(private options: TestRailOptions) {
+        // check if all required options are specified
+        ['username', 'password', 'domain', 'projectId', 'projectId'].forEach(option => {
+            if(!options[option]) {
+                throw new Error(`Missing required option ${option}`);
+            }
+        });
+
         // compute base url
         this.base = `https://${options.domain}/index.php`;
     }
 
     private _post(api: String, body: any, callback: Function, error?: Function) {
-        var req = request("POST", this.base)
+        request("POST", this.base)
             .query(`/api/v2/${api}`)
             .headers({
                 "content-type": "application/json"
@@ -34,8 +41,8 @@ export class TestRail {
             });
     }
 
-    private _get(api: String, callback: Function, error?: Function) {
-        var req = request("GET", this.base)
+    private _get(api: String, callback: Function, error?: Function): void {
+        request("GET", this.base)
             .query(`/api/v2/${api}`)
             .headers({
                 "content-type": "application/json"
@@ -63,16 +70,16 @@ export class TestRail {
     public fetchCases(filters?: { [key: string]: number[] }, callback?: Function): void {
         let filter = "";
         if(filters) {
-            for (var key in filters) {
+            for (let key in filters) {
                 if (filters.hasOwnProperty(key)) {
                     filter += "&" + key + "=" + filters[key].join(",");
                 }
             }
         }
 
-        let req = this._get(`get_cases/${this.options.projectId}&suite_id=${this.options.suiteId}${filter}`, (body) => {
+        this._get(`get_cases/${this.options.projectId}&suite_id=${this.options.suiteId}${filter}`, (body) => {
             if (callback) {
-                callback(body);
+                callback(body.cases);
             }
         });
     }
@@ -101,7 +108,7 @@ export class TestRail {
             }, (body) => {
                 // execute callback if specified
                 if (callback) {
-                    callback();
+                    callback(body);
                 }
             })
         });

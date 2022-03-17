@@ -32,8 +32,8 @@ mocha --opts mocha-testrail.opts build/test
 Mark your mocha test names with ID of Testrail test cases. Ensure that your case ids are well distinct from test descriptions.
  
 ```Javascript
-it("C123 C124 Authenticate with invalid user", . . .
-it("Authenticate a valid user C321", . . .
+it("C123 C124 Authenticate with invalid user", () => {})
+it("Authenticate a valid user C321", () => {})
 ```
 
 Only passed or failed tests will be published. Skipped or pending tests will not be published resulting in a "Pending" status in testrail test run.
@@ -51,6 +51,32 @@ Only passed or failed tests will be published. Skipped or pending tests will not
 **suiteId**: *number* suite number with which the tests are associated
 
 **assignedToId**: *number* (optional) user id which will be assigned failed tests
+
+## Build and test locally
+
+### Setup testrail test server
+
+- Start a new TestRail trial from https://www.gurock.com/testrail/test-management/
+- Enable API under https://XXX.testrail.io/index.php?/admin/site_settings&tab=8
+- Add a new project (Use multiple test suites to manage cases)
+- Add a new test suite (ids: 1)
+- Add at least 4 test cases (ids: C1, C2, C3, C4, etc)
+- Once setup, set your environment variables - recommend using .env file in the root folder
+  - DOMAIN=XXX.testrail.io 
+  - USERNAME=XXX 
+  - PASSWORD=XXX 
+  - PROJECTID=1 
+  - SUITEID=1 
+  - ASSIGNEDTOID=1
+- Execute the build and test commands (unit and integration tests)
+- Execute the e2e test (requires build and .env file)
+
+### Build and test
+```
+npm run clean
+npm run build
+npm run test
+```
 
 ## References
 - http://mochajs.org/#mochaopts
