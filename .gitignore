@@ -1,10 +1,10 @@
 node_modules
 node-debug*
+*.log
 .c9/
 *.iml
 .idea/
-npm-debug.log
 dist
-/.env
+.env
 yarn.lock
 package-lock.json

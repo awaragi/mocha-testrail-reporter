@@ -6,6 +6,7 @@ dist/test
 tsconfig.json
 *.map
 *.lock
+package-lock.json
 .prettier*
 .env
 *.tgz
