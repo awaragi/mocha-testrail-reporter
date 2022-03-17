@@ -4,6 +4,8 @@
 
 Pushes test results into Testrail system.
 
+> **NOTE** : Version 2.0.x is backward compatible with v1 but has been updated to latest dependencies. The V2 choice is to ensure that existing users are not affected!
+
 ## Installation
 
 ```shell
