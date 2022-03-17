@@ -3,7 +3,7 @@ on:
   pull_request:
     types: [opened, ready_for_review, review_requested, synchronize]
   push: 
-    branches: ['master']
+    branches: ['master', 'develop']
 jobs:
   build:
     runs-on: ubuntu-latest
