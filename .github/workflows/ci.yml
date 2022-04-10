@@ -1,4 +1,4 @@
-name: Test
+name: Continuous Integration Checking
 on:
   pull_request:
     types: [opened, ready_for_review, review_requested, synchronize]

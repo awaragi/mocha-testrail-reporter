@@ -1,4 +1,4 @@
-name: Package and publish
+name: Continuous Deploiment Package and Publish
 on:
   release:
     types: [published]
