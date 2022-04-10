@@ -6,5 +6,6 @@ node-debug*
 .idea/
 dist
 .env
+*.tgz
 yarn.lock
 package-lock.json
