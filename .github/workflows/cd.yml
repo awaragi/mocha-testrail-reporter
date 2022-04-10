@@ -24,6 +24,6 @@ jobs:
           TESTRAIL_PROJECTID: 1
           TESTRAIL_SUITEID: 1
           TESTRAIL_ASSIGNEDTOID: 1
-      - run: yarn publish
+      - run: yarn publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
