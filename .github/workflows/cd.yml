@@ -1,4 +1,4 @@
-name: Package and publish
+name: Continuous Deploiment Package and Publish
 on:
   release:
     types: [published]
@@ -18,12 +18,12 @@ jobs:
       - run: yarn build
       - run: yarn test
         env:
-          DOMAIN: ${{ secrets.DOMAIN }}
-          USERNAME: ${{ secrets.USERNAME }}
-          PASSWORD: ${{ secrets.PASSWORD }}
-          PROJECTID: 1
-          SUITEID: 1
-          ASSIGNEDTOID: 1
-      - run: yarn publish
+          TESTRAIL_DOMAIN: ${{ secrets.DOMAIN }}
+          TESTRAIL_USERNAME: ${{ secrets.USERNAME }}
+          TESTRAIL_PASSWORD: ${{ secrets.PASSWORD }}
+          TESTRAIL_PROJECTID: 1
+          TESTRAIL_SUITEID: 1
+          TESTRAIL_ASSIGNEDTOID: 1
+      - run: yarn publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
