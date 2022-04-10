@@ -4,6 +4,7 @@ node-debug*
 .c9/
 *.iml
 .idea/
+*.sh
 dist
 .env
 *.tgz

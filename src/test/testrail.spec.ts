@@ -4,12 +4,12 @@ import { TestRailCase, Status } from "../lib/testrail.interface";
 describe("TestRail API", () => {
   it("Publish test run", (done) => {
     let testRail = new TestRail({
-      domain: process.env.DOMAIN,
-      username: process.env.USERNAME,
-      password: process.env.PASSWORD,
-      projectId: process.env.PROJECTID,
-      suiteId: process.env.SUITEID,
-      assignedToId: process.env.ASSIGNEDTOID,
+      domain: process.env.TESTRAIL_DOMAIN,
+      username: process.env.TESTRAIL_USERNAME,
+      password: process.env.TESTRAIL_PASSWORD,
+      projectId: process.env.TESTRAIL_PROJECTID,
+      suiteId: process.env.TESTRAIL_SUITEID,
+      assignedToId: process.env.TESTRAIL_ASSIGNEDTOID,
     });
 
     testRail.fetchCases({}, (cases: TestRailCase[]) => {
