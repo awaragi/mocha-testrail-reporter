@@ -1,0 +1,28 @@
+name: Continuous Integration Checking
+on:
+  pull_request:
+    types: [opened, ready_for_review, review_requested, synchronize]
+  push: 
+    branches: ["master", "develop"]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      # Setup .npmrc file to publish to npm
+      - uses: actions/setup-node@v2
+        with:
+          node-version: "14.x"
+          registry-url: "https://registry.npmjs.org"
+          # Defaults to the user or organization that owns the workflow file
+          scope: "@octocat"
+      - run: yarn
+      - run: yarn build
+      - run: yarn test
+        env:
+          TESTRAIL_DOMAIN: ${{ secrets.DOMAIN }}
+          TESTRAIL_USERNAME: ${{ secrets.USERNAME }}
+          TESTRAIL_PASSWORD: ${{ secrets.PASSWORD }}
+          TESTRAIL_PROJECTID: 1
+          TESTRAIL_SUITEID: 1
+          TESTRAIL_ASSIGNEDTOID: 1

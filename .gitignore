@@ -1,0 +1,12 @@
+node_modules
+node-debug*
+*.log
+.c9/
+*.iml
+.idea/
+*.sh
+dist
+.env
+*.tgz
+yarn.lock
+package-lock.json
